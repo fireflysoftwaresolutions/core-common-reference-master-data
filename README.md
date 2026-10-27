@@ -207,7 +207,7 @@ For a project-specific provider, implement the existing typed boundary and selec
 
 ## Configuration and local setup
 
-Runtime configuration sources: [DocumentLayoutProfileConfiguration.java](core-common-reference-master-data-core/src/main/java/io/fireflysoftware/masters/core/services/document/layout/v1/DocumentLayoutProfileConfiguration.java), [openapi.yml](core-common-reference-master-data-sdk/src/main/resources/api-spec/openapi.yml), [openapi.yml](core-common-reference-master-data-sdk/src/main/resources/openapi.yml), [MasterDataApplication.java](core-common-reference-master-data-web/src/main/java/io/fireflysoftware/masters/web/MasterDataApplication.java), [application.yaml](core-common-reference-master-data-web/src/main/resources/application.yaml).
+Runtime configuration sources: [DocumentLayoutProfileConfiguration.java](core-common-reference-master-data-core/src/main/java/io/fireflysoftware/masters/core/services/document/layout/v1/DocumentLayoutProfileConfiguration.java), [openapi.yml](core-common-reference-master-data-sdk/src/main/resources/openapi.yml), [MasterDataApplication.java](core-common-reference-master-data-web/src/main/java/io/fireflysoftware/masters/web/MasterDataApplication.java), [application.yaml](core-common-reference-master-data-web/src/main/resources/application.yaml).
 
 | Environment variable or property | Declared fallback |
 | --- | --- |
@@ -295,6 +295,7 @@ Documentation generation checks source freshness and local references. It does n
 ## Further reading, contribution, and license
 
 - [Currency execution policy publications](docs/currency-execution-policies.md)
+- [Insurance reference commands and security configuration](docs/insurance-reference-commands.md)
 - [Publish document layouts and legal-notice associations](docs/document-layout-publications.md)
 - [Immutable document template revisions](docs/document-template-revisions.md)
 - [Sandbox financial stationery](sandbox/documents/README.md)

@@ -5,6 +5,8 @@ info:
 servers:
 - url: http://localhost:18080
   description: Generated server url
+security:
+- bearerAuth: []
 tags:
 - name: Notification Message Localizations
   description: APIs for managing notification message localizations
@@ -14,6 +16,9 @@ tags:
   description: APIs for managing countries
 - name: Asset Type
   description: APIs for managing Asset Type data
+- name: Insurance Reference Commands
+  description: Current-authorized catalog commands and historical action receipts;
+    receipts are not current publication evidence
 - name: Lookup Items
   description: APIs for managing lookup items
 - name: Notification Message Catalog
@@ -4121,6 +4126,126 @@ paths:
                 $ref: "#/components/schemas/LanguageLocaleDTO"
         "400":
           description: Invalid input data
+  /api/v1/insurance-references/withdrawal-intents:
+    post:
+      tags:
+      - Insurance Reference Commands
+      summary: Submit an exact current catalog publication for withdrawal approval
+      operationId: submitInsuranceReferenceWithdrawal
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmitWithdrawal"
+        required: true
+      responses:
+        "200":
+          description: Historical action receipt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Receipt"
+      x-disable-idempotency: true
+  /api/v1/insurance-references/publication-intents:
+    post:
+      tags:
+      - Insurance Reference Commands
+      summary: Submit catalog data for independent approval
+      operationId: submitInsuranceReferencePublication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmitPublication"
+        required: true
+      responses:
+        "200":
+          description: Historical action receipt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Receipt"
+      x-disable-idempotency: true
+  /api/v1/insurance-references/intents/withdraw:
+    post:
+      tags:
+      - Insurance Reference Commands
+      summary: Withdraw an exact retained intent under current permission
+      operationId: withdrawInsuranceReferenceIntent
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IntentAction"
+        required: true
+      responses:
+        "200":
+          description: Historical action receipt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Receipt"
+      x-disable-idempotency: true
+  /api/v1/insurance-references/intents/execute:
+    post:
+      tags:
+      - Insurance Reference Commands
+      summary: Execute an exact approved intent after current source and native checks
+      operationId: executeInsuranceReferenceIntent
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IntentAction"
+        required: true
+      responses:
+        "200":
+          description: Historical action receipt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Receipt"
+      x-disable-idempotency: true
+  /api/v1/insurance-references/intents/approve:
+    post:
+      tags:
+      - Insurance Reference Commands
+      summary: Approve an exact retained intent as an independent current caller
+      operationId: approveInsuranceReferenceIntent
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IntentAction"
+        required: true
+      responses:
+        "200":
+          description: Historical action receipt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Receipt"
+      x-disable-idempotency: true
+  /api/v1/insurance-references/actions/recover:
+    post:
+      tags:
+      - Insurance Reference Commands
+      summary: Recover an exact retained receipt under fresh current permission
+      operationId: recoverInsuranceReferenceAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Recovery"
+        required: true
+      responses:
+        "200":
+          description: Historical action receipt without a current eligibility claim
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Receipt"
+      x-disable-idempotency: true
   /api/v1/identity-documents:
     get:
       tags:
@@ -9132,6 +9257,308 @@ components:
           format: int32
       description: Represents a paginated response containing a list of items and
         pagination metadata.
+    Head:
+      required:
+      - generation
+      - revision
+      type: object
+      properties:
+        publicationId:
+          type: string
+          format: uuid
+        revision:
+          type: integer
+          format: int64
+        generation:
+          type: integer
+          format: int64
+      additionalProperties: false
+    SubmitWithdrawal:
+      required:
+      - actionId
+      - expected
+      - kind
+      - recordId
+      type: object
+      properties:
+        actionId:
+          type: string
+          format: uuid
+        recordId:
+          type: string
+          format: uuid
+        kind:
+          type: string
+          enum:
+          - PREMIUM_TAX
+          - COVERAGE_WORDING
+          - EXCLUSION_WORDING
+        expected:
+          $ref: "#/components/schemas/Head"
+      additionalProperties: false
+    Receipt:
+      type: object
+      properties:
+        actionId:
+          type: string
+          format: uuid
+        recordId:
+          type: string
+          format: uuid
+        kind:
+          type: string
+          enum:
+          - PREMIUM_TAX
+          - COVERAGE_WORDING
+          - EXCLUSION_WORDING
+        intentId:
+          type: string
+          format: uuid
+        intentDigest:
+          type: string
+        publicationId:
+          type: string
+          format: uuid
+        revision:
+          type: integer
+          format: int64
+        intentGeneration:
+          type: integer
+          format: int64
+        operation:
+          type: string
+      description: Historical action receipt; not a current publication observation
+      readOnly: true
+    Applicability:
+      required:
+      - events
+      - jurisdictions
+      - productProfiles
+      type: object
+      properties:
+        jurisdictions:
+          type: array
+          items:
+            type: string
+        productProfiles:
+          type: array
+          items:
+            type: string
+        events:
+          type: array
+          items:
+            type: string
+            enum:
+            - NEW_BUSINESS
+            - RENEWAL
+            - ENDORSEMENT
+            - CANCELLATION_REFUND
+      additionalProperties: false
+    Body:
+      type: object
+      oneOf:
+      - $ref: "#/components/schemas/PremiumTax"
+      - $ref: "#/components/schemas/Wording"
+    CurrencyPolicyReference:
+      required:
+      - currencyId
+      - digest
+      - encodingVersion
+      - isoCode
+      - policyId
+      - version
+      type: object
+      properties:
+        policyId:
+          type: string
+        currencyId:
+          type: string
+        isoCode:
+          type: string
+        version:
+          type: integer
+          format: int64
+        digest:
+          type: string
+        encodingVersion:
+          type: string
+      additionalProperties: false
+    PremiumTax:
+      required:
+      - applicability
+      - basis
+      - currencyPolicy
+      - postedScale
+      - ratePartsPerMillion
+      - roundingMode
+      type: object
+      properties:
+        basis:
+          type: string
+          enum:
+          - NET_PREMIUM_EXCLUSIVE
+        ratePartsPerMillion:
+          type: integer
+          format: int32
+        roundingMode:
+          type: string
+          enum:
+          - HALF_UP
+          - HALF_EVEN
+          - DOWN
+          - UP
+        postedScale:
+          type: integer
+          format: int32
+        currencyPolicy:
+          $ref: "#/components/schemas/CurrencyPolicyReference"
+        applicability:
+          $ref: "#/components/schemas/Applicability"
+      additionalProperties: false
+    Provenance:
+      required:
+      - origin
+      - rightsReference
+      - sourceDigest
+      - sourceReference
+      - versionText
+      type: object
+      properties:
+        origin:
+          type: string
+          enum:
+          - SANDBOX
+          - CATALOG_SOURCE
+        sourceReference:
+          type: string
+        versionText:
+          type: string
+        sourceDigest:
+          type: string
+        rightsReference:
+          type: string
+      additionalProperties: false
+    PublicationDraft:
+      required:
+      - code
+      - definition
+      - effectiveFrom
+      - expected
+      - kind
+      - provenance
+      - recordId
+      type: object
+      properties:
+        recordId:
+          type: string
+          format: uuid
+        kind:
+          type: string
+          enum:
+          - PREMIUM_TAX
+          - COVERAGE_WORDING
+          - EXCLUSION_WORDING
+        code:
+          type: string
+        effectiveFrom:
+          $ref: "#/components/schemas/FireflyInstant"
+        effectiveUntil:
+          $ref: "#/components/schemas/FireflyInstant"
+        definition:
+          $ref: "#/components/schemas/Body"
+        provenance:
+          $ref: "#/components/schemas/Provenance"
+        expected:
+          $ref: "#/components/schemas/Head"
+      additionalProperties: false
+    SubmitPublication:
+      required:
+      - actionId
+      - draft
+      type: object
+      properties:
+        actionId:
+          type: string
+          format: uuid
+        draft:
+          $ref: "#/components/schemas/PublicationDraft"
+      additionalProperties: false
+    Wording:
+      required:
+      - applicability
+      - content
+      - localeCode
+      - localeId
+      - mediaType
+      type: object
+      properties:
+        localeId:
+          type: string
+          format: uuid
+        localeCode:
+          type: string
+        mediaType:
+          type: string
+        content:
+          type: string
+        applicability:
+          $ref: "#/components/schemas/Applicability"
+      additionalProperties: false
+    IntentAction:
+      required:
+      - actionId
+      - expectedIntentGeneration
+      - intentDigest
+      - intentId
+      - kind
+      - recordId
+      type: object
+      properties:
+        actionId:
+          type: string
+          format: uuid
+        recordId:
+          type: string
+          format: uuid
+        kind:
+          type: string
+          enum:
+          - PREMIUM_TAX
+          - COVERAGE_WORDING
+          - EXCLUSION_WORDING
+        intentId:
+          type: string
+          format: uuid
+        intentDigest:
+          type: string
+        expectedIntentGeneration:
+          minimum: 0
+          type: integer
+          format: int64
+      additionalProperties: false
+    Recovery:
+      required:
+      - actionId
+      - intentDigest
+      - kind
+      - recordId
+      type: object
+      properties:
+        actionId:
+          type: string
+          format: uuid
+        recordId:
+          type: string
+          format: uuid
+        kind:
+          type: string
+          enum:
+          - PREMIUM_TAX
+          - COVERAGE_WORDING
+          - EXCLUSION_WORDING
+        intentDigest:
+          type: string
+      additionalProperties: false
     DocumentTemplateRevisionDTO:
       type: object
       properties:
@@ -9559,22 +9986,6 @@ components:
           minLength: 1
           type: string
       additionalProperties: false
-    CurrencyPolicyReference:
-      type: object
-      properties:
-        policyId:
-          type: string
-        currencyId:
-          type: string
-        isoCode:
-          type: string
-        version:
-          type: integer
-          format: int64
-        digest:
-          type: string
-        encodingVersion:
-          type: string
     CurrencyPolicyView:
       type: object
       properties:
@@ -9842,3 +10253,11 @@ components:
         headVersion:
           type: integer
           format: int64
+    FireflyInstant:
+      type: string
+      format: date-time
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

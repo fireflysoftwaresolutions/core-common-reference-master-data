@@ -74,6 +74,9 @@ logging:
     org.flywaydb: DEBUG
 
 firefly:
+  openapi:
+    instant-scalar:
+      enabled: true
   security:
     resource-server:
       strict-policy: true
