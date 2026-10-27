@@ -17,7 +17,7 @@ import org.springframework.data.relational.core.query.*;
 import reactor.core.publisher.*;
 
 @Repository("currencyPolicyRepository")
-public final class CurrencyPolicyRepositoryImpl implements CurrencyPolicyRepository {
+public class CurrencyPolicyRepositoryImpl implements CurrencyPolicyRepository {
     private final R2dbcEntityTemplate operations;
     private final CurrencyPolicyTechnicalRepository technical;
     private final CurrencyPolicyObservationRepository observations;
