@@ -4146,6 +4146,90 @@ paths:
               schema:
                 $ref: "#/components/schemas/Receipt"
       x-disable-idempotency: true
+  /api/v1/insurance-references/sandbox-facts/withdraw:
+    post:
+      tags:
+      - insurance-sandbox-fact-controller
+      summary: Current-authorized durable sandbox catalog administration
+      operationId: withdrawInsuranceSandboxFact
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Withdraw"
+        required: true
+      responses:
+        "200":
+          description: "Historical sandbox fact receipt, not current eligibility or\
+            \ legal authority"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InsuranceSandboxFactReceipt"
+      x-disable-idempotency: true
+  /api/v1/insurance-references/sandbox-facts/sources:
+    post:
+      tags:
+      - insurance-sandbox-fact-controller
+      summary: Current-authorized durable sandbox catalog administration
+      operationId: registerInsuranceSandboxSource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterSource"
+        required: true
+      responses:
+        "200":
+          description: "Historical sandbox fact receipt, not current eligibility or\
+            \ legal authority"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InsuranceSandboxFactReceipt"
+      x-disable-idempotency: true
+  /api/v1/insurance-references/sandbox-facts/rights:
+    post:
+      tags:
+      - insurance-sandbox-fact-controller
+      summary: Current-authorized durable sandbox catalog administration
+      operationId: registerInsuranceSandboxRights
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRights"
+        required: true
+      responses:
+        "200":
+          description: "Historical sandbox fact receipt, not current eligibility or\
+            \ legal authority"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InsuranceSandboxFactReceipt"
+      x-disable-idempotency: true
+  /api/v1/insurance-references/sandbox-facts/locales:
+    post:
+      tags:
+      - insurance-sandbox-fact-controller
+      summary: Current-authorized durable sandbox catalog administration
+      operationId: registerInsuranceSandboxLocale
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterLocale"
+        required: true
+      responses:
+        "200":
+          description: "Historical sandbox fact receipt, not current eligibility or\
+            \ legal authority"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InsuranceSandboxFactReceipt"
+      x-disable-idempotency: true
   /api/v1/insurance-references/publication-intents:
     post:
       tags:
@@ -6743,6 +6827,71 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/LegalFormDTO"
+  /api/v1/insurance-references/{kind}/{recordId}/publications/{publicationId}/revisions/{revision}/current:
+    get:
+      tags:
+      - insurance-reference-current-controller
+      summary: Observe one exact currently eligible catalog reference
+      operationId: observeCurrentInsuranceReference
+      parameters:
+      - name: kind
+        in: path
+        required: true
+        schema:
+          type: string
+          enum:
+          - PREMIUM_TAX
+          - COVERAGE_WORDING
+          - EXCLUSION_WORDING
+      - name: recordId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: publicationId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: revision
+        in: path
+        required: true
+        schema:
+          minimum: 1
+          type: integer
+          format: int64
+      - name: definitionDigest
+        in: query
+        required: true
+        schema:
+          maxLength: 64
+          minLength: 64
+          pattern: "^[0-9a-f]{64}(?![\\s\\S])"
+          type: string
+      - name: generation
+        in: query
+        required: true
+        schema:
+          minimum: 0
+          type: integer
+          format: int64
+      - name: X-Idempotency-Key
+        in: header
+        description: "Optional retry key for scoped POST, PUT, PATCH, and DELETE response\
+          \ reuse. Safe methods ignore it. Reuse requires configured trusted identity\
+          \ and namespace; changed input returns 409. Business effects require durable\
+          \ application idempotency."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "Finite exact current catalog observation, not financial or\
+            \ legal authority"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Current"
   /api/v1/identity-documents/country/{countryId}:
     get:
       tags:
@@ -9329,6 +9478,85 @@ components:
           type: string
       description: Historical action receipt; not a current publication observation
       readOnly: true
+    Withdraw:
+      required:
+      - actionId
+      - expectedGeneration
+      - expectedVersion
+      - factId
+      - reasonCode
+      - type
+      type: object
+      properties:
+        actionId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+          - SOURCE
+          - RIGHTS
+          - LOCALE
+        factId:
+          type: string
+          format: uuid
+        expectedVersion:
+          type: integer
+          format: int64
+        expectedGeneration:
+          type: integer
+          format: int64
+        reasonCode:
+          maxLength: 64
+          minLength: 1
+          pattern: "^[A-Z][A-Z0-9_]{0,63}(?![\\s\\S])"
+          type: string
+      additionalProperties: false
+    InsuranceSandboxFactReceipt:
+      required:
+      - actionId
+      - reference
+      - state
+      type: object
+      properties:
+        actionId:
+          type: string
+          format: uuid
+        reference:
+          $ref: "#/components/schemas/InsuranceSandboxFactReference"
+        state:
+          type: string
+          enum:
+          - ACTIVE
+          - WITHDRAWN
+      additionalProperties: false
+    InsuranceSandboxFactReference:
+      required:
+      - digest
+      - factId
+      - generation
+      - type
+      - version
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - SOURCE
+          - RIGHTS
+          - LOCALE
+        factId:
+          type: string
+          format: uuid
+        version:
+          type: integer
+          format: int64
+        generation:
+          type: integer
+          format: int64
+        digest:
+          type: string
+      additionalProperties: false
     Applicability:
       required:
       - events
@@ -9471,17 +9699,63 @@ components:
         expected:
           $ref: "#/components/schemas/Head"
       additionalProperties: false
-    SubmitPublication:
+    RegisterSource:
       required:
       - actionId
       - draft
+      - effectiveUntil
+      - expectedGeneration
+      - expectedVersion
+      - factId
+      - rights
+      - sourceText
+      - submitted
       type: object
       properties:
         actionId:
           type: string
           format: uuid
+        factId:
+          type: string
+          format: uuid
+        expectedVersion:
+          type: integer
+          format: int64
+        expectedGeneration:
+          type: integer
+          format: int64
+        submitted:
+          $ref: "#/components/schemas/SubmittedPublication"
         draft:
           $ref: "#/components/schemas/PublicationDraft"
+        sourceText:
+          type: string
+        rights:
+          $ref: "#/components/schemas/InsuranceSandboxFactReference"
+        locale:
+          $ref: "#/components/schemas/InsuranceSandboxFactReference"
+        effectiveUntil:
+          $ref: "#/components/schemas/FireflyInstant"
+      additionalProperties: false
+    SubmittedPublication:
+      required:
+      - actionId
+      - intentDigest
+      - publicationId
+      - revision
+      type: object
+      properties:
+        actionId:
+          type: string
+          format: uuid
+        intentDigest:
+          type: string
+        publicationId:
+          type: string
+          format: uuid
+        revision:
+          type: integer
+          format: int64
       additionalProperties: false
     Wording:
       required:
@@ -9503,6 +9777,89 @@ components:
           type: string
         applicability:
           $ref: "#/components/schemas/Applicability"
+      additionalProperties: false
+    RegisterRights:
+      required:
+      - actionId
+      - effectiveUntil
+      - expectedGeneration
+      - expectedVersion
+      - factId
+      - insuranceKind
+      - sourceId
+      - sourceText
+      type: object
+      properties:
+        actionId:
+          type: string
+          format: uuid
+        factId:
+          type: string
+          format: uuid
+        expectedVersion:
+          type: integer
+          format: int64
+        expectedGeneration:
+          type: integer
+          format: int64
+        sourceId:
+          type: string
+          format: uuid
+        insuranceKind:
+          type: string
+          enum:
+          - PREMIUM_TAX
+          - COVERAGE_WORDING
+          - EXCLUSION_WORDING
+        sourceText:
+          type: string
+        locale:
+          $ref: "#/components/schemas/InsuranceSandboxFactReference"
+        effectiveUntil:
+          $ref: "#/components/schemas/FireflyInstant"
+      additionalProperties: false
+    RegisterLocale:
+      required:
+      - actionId
+      - effectiveUntil
+      - expectedGeneration
+      - expectedVersion
+      - factId
+      - localeCode
+      - localeId
+      type: object
+      properties:
+        actionId:
+          type: string
+          format: uuid
+        factId:
+          type: string
+          format: uuid
+        expectedVersion:
+          type: integer
+          format: int64
+        expectedGeneration:
+          type: integer
+          format: int64
+        localeId:
+          type: string
+          format: uuid
+        localeCode:
+          type: string
+        effectiveUntil:
+          $ref: "#/components/schemas/FireflyInstant"
+      additionalProperties: false
+    SubmitPublication:
+      required:
+      - actionId
+      - draft
+      type: object
+      properties:
+        actionId:
+          type: string
+          format: uuid
+        draft:
+          $ref: "#/components/schemas/PublicationDraft"
       additionalProperties: false
     IntentAction:
       required:
@@ -10223,6 +10580,120 @@ components:
           format: int32
       description: Represents a paginated response containing a list of items and
         pagination metadata.
+    Control:
+      type: object
+      properties:
+        recordId:
+          type: string
+          format: uuid
+        kind:
+          type: string
+          enum:
+          - PREMIUM_TAX
+          - COVERAGE_WORDING
+          - EXCLUSION_WORDING
+        publicationId:
+          type: string
+          format: uuid
+        revision:
+          type: integer
+          format: int64
+        generation:
+          type: integer
+          format: int64
+        state:
+          type: string
+          enum:
+          - ACTIVE
+          - WITHDRAWN
+    Current:
+      required:
+      - publication
+      - reference
+      type: object
+      properties:
+        reference:
+          $ref: "#/components/schemas/Target"
+        publication:
+          $ref: "#/components/schemas/Observation"
+      additionalProperties: false
+    Observation:
+      type: object
+      properties:
+        definition:
+          $ref: "#/components/schemas/Revision"
+        control:
+          $ref: "#/components/schemas/Control"
+        observedAt:
+          $ref: "#/components/schemas/FireflyInstant"
+        effectiveUntil:
+          $ref: "#/components/schemas/FireflyInstant"
+    Revision:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum:
+          - PREMIUM_TAX
+          - COVERAGE_WORDING
+          - EXCLUSION_WORDING
+        recordId:
+          type: string
+          format: uuid
+        publicationId:
+          type: string
+          format: uuid
+        revision:
+          type: integer
+          format: int64
+        code:
+          type: string
+        effectiveFrom:
+          type: string
+          format: date-time
+        effectiveUntil:
+          type: string
+          format: date-time
+        definition:
+          $ref: "#/components/schemas/Body"
+        provenance:
+          $ref: "#/components/schemas/Provenance"
+    Target:
+      required:
+      - definitionDigest
+      - generation
+      - kind
+      - publicationId
+      - recordId
+      - revision
+      type: object
+      properties:
+        kind:
+          type: string
+          enum:
+          - PREMIUM_TAX
+          - COVERAGE_WORDING
+          - EXCLUSION_WORDING
+        recordId:
+          type: string
+          format: uuid
+        publicationId:
+          type: string
+          format: uuid
+        revision:
+          minimum: 1
+          type: integer
+          format: int64
+        definitionDigest:
+          maxLength: 64
+          minLength: 64
+          pattern: "^[0-9a-f]{64}(?![\\s\\S])"
+          type: string
+        generation:
+          minimum: 0
+          type: integer
+          format: int64
+      additionalProperties: false
     DocumentLayoutSourceObservation:
       required:
       - draftReference

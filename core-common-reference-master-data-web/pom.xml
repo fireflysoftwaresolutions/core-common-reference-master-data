@@ -196,6 +196,8 @@
                                 <configuration>
                                     <arguments combine.children="append">
                                         <argument>--firefly.masters.insurance-reference.commands.enabled=true</argument>
+                                        <argument>--firefly.masters.insurance-reference.current.enabled=true</argument>
+                                        <argument>--firefly.masters.insurance-reference.sandbox-source.enabled=true</argument>
                                         <argument>--firefly.openapi.instant-scalar.enabled=true</argument>
                                     </arguments>
                                 </configuration>
