@@ -1,4 +1,4 @@
-# Insurance reference commands
+# Insurance reference commands and CURRENT
 
 The master-data owner exposes six catalog commands at `/api/v1/insurance-references` when `firefly.masters.insurance-reference.commands.enabled=true`. The feature is disabled by default. Responses are historical action receipts, not current eligibility observations or financial authority.
 
@@ -29,11 +29,34 @@ If no operator `PolicyDecisionPort` exists, explicitly select `policy.backend=op
 
 An actual `InsuranceReferenceSourceVerifier` must provide accepted current currency, locale and provenance/rights evidence where the existing operation requires it. The default verifier is unavailable. Catalog data, a digest or a sandbox label cannot replace that evidence. Independent approval, current permission, exact native graph and deadline checks remain in the existing service and repositories.
 
-This HTTP wiring does not add a CURRENT observation endpoint. Historical recovery never substitutes for one. Original producer/SDK regeneration, real application HTTPS, native pool behavior and positive source-provider journeys require separate qualification of this source; no generated SDK or specification is edited by hand.
+### Exact CURRENT observation
+
+Separately enable `firefly.masters.insurance-reference.current.enabled=true` and provide its `issuers` and dedicated `reader.url`, `reader.username`, `reader.password`. The reader follows the existing `masters_ins_ref_reader` contract; this graph never binds command/writer credentials. The original global JWT/current-policy boundary still applies, along with `masters.insurance-reference.current` for the exact resource.
+
+`GET /api/v1/insurance-references/{kind}/{recordId}/publications/{publicationId}/revisions/{revision}/current` requires exactly `definitionDigest` and `generation` query parameters. These select an immutable publication and its current local control generation; a receipt or intent generation cannot substitute. The service takes two real mapped repeatable-read snapshots around fresh source/currency observation, verifies the complete stored reference and every original/native/provider/effectivity cap, and rechecks the same current caller and PDP. It returns a technical finite observation horizon, not a new grant or financial authority. Historical recovery is independent and never becomes CURRENT.
+
+CURRENT returns HTTP 200 with no-store only for the exact eligible reference, HTTP 400 for invalid selectors, HTTP 403 for denied current permission, HTTP 409 for known NOT_CURRENT and HTTP 503 for unavailable or uncertain evidence. A known negative read survives transaction wrapping only after acknowledged complete rollback, no commit/boundary and a still-live original/native cap. Cleanup, clock and arbitrary failures remain unavailable.
+
+### Durable sandbox source facts
+
+The separately default-off `firefly.masters.insurance-reference.sandbox-source.enabled` graph stores explicitly SANDBOX-scoped, immutable versioned locale snapshots, content-rights facts and exact publication-source definitions. Configure its `issuers` and distinct `writer`/`reader` URL/username/password properties. They must use the command database and trust set, with `masters_ins_ref_source_registrar` and `masters_ins_ref_source_reader`. The reader is physically read-only/repeatable-read; mapped writes use the dedicated registrar graph. These storage privileges never stand in for a current caller or PDP grant.
+
+| POST path under `/api/v1/insurance-references/sandbox-facts` | Exact current operation |
+| --- | --- |
+| `/locales` | `masters.insurance-reference.sandbox-source.locale.register` |
+| `/rights` | `masters.insurance-reference.sandbox-source.rights.register` |
+| `/sources` | `masters.insurance-reference.sandbox-source.source.register` |
+| `/withdraw` | `masters.insurance-reference.sandbox-source.<type>.withdraw` |
+
+All four use strict bounded JSON, no-store and native owner replay rather than the generic response cache. Source reads separately require `masters.insurance-reference.sandbox-source.source.read`. Register a real locale snapshot and exact owned synthetic-content rights, then call the real publication SUBMIT. Source registration binds its actual reserved publication/revision and the complete caller-retained draft through protected recovery; independent approval and execution follow. A guessed UUID, digest, source URI or SANDBOX label never supplies eligibility. Locale mutation/restoration advances a durable epoch and cannot revive an old admission. Withdrawal preserves history and cannot reactivate the same version. Tax additionally needs the existing real current currency-policy connector; wording qualification does not establish positive tax/currency evidence.
+
+Provision and attest the existing restricted owner/guard/writer/reader roles and both source roles before applying V34–V36, even while the feature flags remain off. Roles are cluster-global, so existing-role reuse and deployment ownership require explicit DBA review. Use separate administrative migration and runtime credentials; the source/schema guards do not grant runtime elevation. V36 corrects only deferred context/witness record dispatch and retains the original completion/clock/authority guards.
+
+The 367 ordinary source tests and a fresh owned native36 service workflow qualify normal wording registration/publication/CURRENT, restart, approved withdrawal, exact negative CURRENT and historical recovery. The new CURRENT/source routes have not yet been qualified through the original producer/generated SDK or real application HTTPS. The retained original480 build/spec/SDK covers207 operations; it does not contain these five new routes. This source does not claim legal/financial admission, positive tax currency, all native failure cases or a complete document/customer journey.
 
 ## Original specification and SDK generation
 
-The original `generate-openapi` build profile enables the six controller declarations only in the lightweight `OpenApiGenApplication` process. Its existing documentation-only mock registrar supplies controller service interfaces; it does not start the production business pools or prove successful commands. Ordinary application invocations keep commands disabled by default.
+The retained original `generate-openapi` build profile enables the six command declarations only in the lightweight `OpenApiGenApplication` process. Its existing documentation-only mock registrar supplies controller service interfaces; it does not start the production business pools or prove successful commands. Ordinary application invocations keep commands, CURRENT and sandbox-source features disabled by default. A separate original metadata/SDK gate must enable all new controller declarations in that documentation-only process and regenerate the complete212-operation contract; no generated output is patched by hand.
 
 The production OpenAPI metadata configuration also applies to that original producer. It declares the global bearer requirement, including legacy operations, and retains other documented requirements as additional conditions. The shared `FireflyInstant` scalar and the SDK's standard schema mapping preserve UTC Instant values without changing the legacy date library. The original Generator uses its standard oneOf interfaces and deduction options for tax and wording bodies; no discriminator field is added to requests.
 

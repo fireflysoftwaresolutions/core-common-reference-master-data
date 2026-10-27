@@ -62,7 +62,7 @@ public final class InsuranceReferenceContracts {
         @Override public String toString(){return "InsuranceReferenceControl";}
     }
     /** Observation shape only. Actual current stored records, principal, policy and native timing are service obligations. */
-    public record Observation(Revision definition,Control control,Instant observedAt,Instant effectiveUntil){
+    public record Observation(Revision definition,Control control,@Schema(ref="#/components/schemas/FireflyInstant") Instant observedAt,@Schema(ref="#/components/schemas/FireflyInstant") Instant effectiveUntil){
         public Observation{
             Objects.requireNonNull(definition);Objects.requireNonNull(control);requireTimestamp(observedAt);requireTimestamp(effectiveUntil);
             require(control.state()==State.ACTIVE&&control.recordId().equals(definition.recordId())&&control.kind()==definition.kind()&&control.publicationId().equals(definition.publicationId())&&control.revision()==definition.revision());

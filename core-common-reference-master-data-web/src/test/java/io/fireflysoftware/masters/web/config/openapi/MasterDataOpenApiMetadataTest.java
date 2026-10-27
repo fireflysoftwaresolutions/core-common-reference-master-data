@@ -30,32 +30,60 @@ class MasterDataOpenApiMetadataTest {
                 "core-common-reference-master-data-sdk/src/main/resources/openapi.yml"));
         OpenAPI api;
         try (resource) { api = io.swagger.v3.core.util.Yaml.mapper().readValue(resource, OpenAPI.class); }
-        int original = api.getPaths().values().stream().mapToInt(path -> path.readOperations().size()).sum();
-        var controller = io.fireflysoftware.masters.web.controllers.insurance.reference.InsuranceReferenceController.class;
-        var prefix = controller.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class).value()[0];
-        int commands = 0;
-        int existingCommands = 0;
-        for (var method : controller.getDeclaredMethods()) {
-            var mapping = method.getAnnotation(org.springframework.web.bind.annotation.PostMapping.class);
-            if (mapping == null) continue;
-            var path = api.getPaths().computeIfAbsent(prefix + mapping.value()[0], ignored -> new PathItem());
-            if (path.getPost() == null) path.post(new Operation());
-            else existingCommands++;
-            commands++;
+        var currentPath="/api/v1/insurance-references/{kind}/{recordId}/publications/{publicationId}/revisions/{revision}/current";
+        var withCurrent=io.swagger.v3.core.util.Json.mapper().convertValue(api,OpenAPI.class);
+        withCurrent.getPaths().computeIfAbsent(currentPath,ignored->new PathItem()).get(new Operation().operationId("observeCurrentInsuranceReference"));
+        verifySourceRoutes(withCurrent);
+        verifySourceRoutes(api);
+        verifySourceRoutes(api);
+        var withoutInsurance=new OpenAPI().paths(new Paths());
+        api.getPaths().forEach((path,value)->{if(!path.startsWith("/api/v1/insurance-references"))withoutInsurance.getPaths().addPathItem(path,value);});
+        verifySourceRoutes(withoutInsurance);
+        var currentOnly=new OpenAPI().paths(new Paths());
+        withoutInsurance.getPaths().forEach((path,value)->{if(!path.startsWith("/api/v1/insurance-references"))currentOnly.getPaths().addPathItem(path,value);});
+        var current="/api/v1/insurance-references/{kind}/{recordId}/publications/{publicationId}/revisions/{revision}/current";
+        currentOnly.getPaths().addPathItem(current,new PathItem().get(new Operation().operationId("observeCurrentInsuranceReference")));
+        verifySourceRoutes(currentOnly);
+    }
+
+    private static void verifySourceRoutes(OpenAPI api) {
+        int legacy=api.getPaths().entrySet().stream().filter(entry->!entry.getKey().startsWith("/api/v1/insurance-references"))
+                .mapToInt(entry->entry.getValue().readOperations().size()).sum();
+        assertEquals(201,legacy);
+        int declared=0;
+        var expectedRoutes=new java.util.HashSet<String>();
+        for(var controller:List.of(io.fireflysoftware.masters.web.controllers.insurance.reference.InsuranceReferenceController.class,
+                io.fireflysoftware.masters.web.controllers.insurance.reference.InsuranceReferenceCurrentController.class,
+                io.fireflysoftware.masters.web.controllers.insurance.reference.InsuranceSandboxFactController.class)) {
+            var prefix=controller.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class).value()[0];
+            for(var method:controller.getDeclaredMethods()) {
+                var post=method.getAnnotation(org.springframework.web.bind.annotation.PostMapping.class);
+                var get=method.getAnnotation(org.springframework.web.bind.annotation.GetMapping.class);
+                if(post==null&&get==null)continue;
+                String route=prefix+(post==null?get.value()[0]:post.value()[0]);
+                var verb=post==null?PathItem.HttpMethod.GET:PathItem.HttpMethod.POST;
+                var id=method.getAnnotation(io.swagger.v3.oas.annotations.Operation.class).operationId();
+                var path=api.getPaths().computeIfAbsent(route,ignored->new PathItem());
+                var existing=path.readOperationsMap().get(verb);
+                if(existing==null)path.operation(verb,new Operation().operationId(id));else assertEquals(id,existing.getOperationId());
+                expectedRoutes.add(verb+" "+route);declared++;
+            }
         }
-        assertEquals(6, commands);
-        assertEquals(201, original - existingCommands);
+        assertEquals(11,declared);
+        for(var entry:api.getPaths().entrySet())if(entry.getKey().startsWith("/api/v1/insurance-references"))
+            for(var verb:entry.getValue().readOperationsMap().keySet())assertTrue(expectedRoutes.contains(verb+" "+entry.getKey()));
         new MasterDataOpenApiMetadataConfiguration().masterDataBearerOpenApiCustomizer().customise(api);
-        assertEquals(SecurityScheme.Type.HTTP, api.getComponents().getSecuritySchemes().get("bearerAuth").getType());
-        assertEquals("bearer", api.getComponents().getSecuritySchemes().get("bearerAuth").getScheme());
-        int protectedOperations = 0;
-        for (var path : api.getPaths().values()) for (var operation : path.readOperations()) {
-            var effective = operation.getSecurity() == null ? api.getSecurity() : operation.getSecurity();
-            assertFalse(effective.isEmpty());
-            assertTrue(effective.stream().allMatch(requirement -> requirement.containsKey("bearerAuth")));
-            protectedOperations++;
+        assertEquals(SecurityScheme.Type.HTTP,api.getComponents().getSecuritySchemes().get("bearerAuth").getType());
+        assertEquals("bearer",api.getComponents().getSecuritySchemes().get("bearerAuth").getScheme());
+        int protectedOperations=0;
+        for(var path:api.getPaths().values())for(var operation:path.readOperations()){
+            var effective=operation.getSecurity()==null?api.getSecurity():operation.getSecurity();
+            assertFalse(effective.isEmpty());assertTrue(effective.stream().allMatch(requirement->requirement.containsKey("bearerAuth")));protectedOperations++;
         }
-        assertEquals(207, protectedOperations);
+        assertEquals(212,protectedOperations);
+        var before=io.swagger.v3.core.util.Json.pretty(api);
+        new MasterDataOpenApiMetadataConfiguration().masterDataBearerOpenApiCustomizer().customise(api);
+        assertEquals(before,io.swagger.v3.core.util.Json.pretty(api));
     }
 
     @Test void existingOperationOverridesCannotLeaveAnAnonymousOrAlternativeAuthBranch() {

@@ -1,1 +1,3 @@
 io.fireflysoftware.masters.web.config.insurance.reference.InsuranceReferencePolicyAutoConfiguration
+io.fireflysoftware.masters.web.config.insurance.reference.InsuranceReferenceCurrentPolicyAutoConfiguration
+io.fireflysoftware.masters.web.config.insurance.reference.InsuranceSandboxSourcePolicyAutoConfiguration

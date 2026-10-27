@@ -36,7 +36,7 @@ Reference data does not own products, parties, contracts, or customer permission
 | [ContractRoleScopeController](core-common-reference-master-data-web/src/main/java/io/fireflysoftware/masters/web/controllers/contractrole/v1/ContractRoleScopeController.java) | `GET /api/v1/contract-role-scopes/{scopeId}`; `GET /api/v1/contract-role-scopes/role/{roleId}`; `GET /api/v1/contract-role-scopes/role/{roleId}/active`; 4 more declarations |
 | [ContractTypeController](core-common-reference-master-data-web/src/main/java/io/fireflysoftware/masters/web/controllers/contracttype/v1/ContractTypeController.java) | `GET /api/v1/contract-types`; `GET /api/v1/contract-types/{contractId}`; `POST /api/v1/contract-types`; 2 more declarations |
 | [CountryController](core-common-reference-master-data-web/src/main/java/io/fireflysoftware/masters/web/controllers/country/v1/CountryController.java) | `GET /api/v1/countries/{countryId}`; `POST /api/v1/countries/filter`; `POST /api/v1/countries`; 2 more declarations |
-| [CurrencyExecutionPolicyController](core-common-reference-master-data-web/src/main/java/io/fireflysoftware/masters/web/controllers/currency/policy/v1/CurrencyExecutionPolicyController.java) | `GET /api/v1/currency-execution-policies/currencies/{currencyId}/source-observation`; `GET /api/v1/currency-execution-policies/{policyId}`; `GET /api/v1/currency-execution-policies/by-action/{actionId}`; 2 more declarations |
+| [CurrencyExecutionPolicyController](core-common-reference-master-data-web/src/main/java/io/fireflysoftware/masters/web/controllers/currency/policy/CurrencyExecutionPolicyController.java) | `GET /api/v1/currency-execution-policies/currencies/{currencyId}/source-observation`; `GET /api/v1/currency-execution-policies/{policyId}`; `GET /api/v1/currency-execution-policies/by-action/{actionId}`; 2 more declarations |
 | [CurrencyController](core-common-reference-master-data-web/src/main/java/io/fireflysoftware/masters/web/controllers/currency/v1/CurrencyController.java) | `GET /api/v1/currencies/{currencyId}`; `POST /api/v1/currencies/filter`; `POST /api/v1/currencies`; 2 more declarations |
 | [AdministrativeDivisionController](core-common-reference-master-data-web/src/main/java/io/fireflysoftware/masters/web/controllers/division/v1/AdministrativeDivisionController.java) | `GET /api/v1/divisions`; `GET /api/v1/divisions/{divisionId}`; `POST /api/v1/divisions`; 2 more declarations |
 | [DocumentLayoutPublicationController](core-common-reference-master-data-web/src/main/java/io/fireflysoftware/masters/web/controllers/document/layout/v1/DocumentLayoutPublicationController.java) | `GET /api/v1/document-layout-publications/templates/{templateId}/source-observation`; `GET /api/v1/document-layout-publications/{layoutRevisionId}`; `GET /api/v1/document-layout-publications/resolve`; 2 more declarations |
@@ -271,7 +271,7 @@ CI definitions: [maven-central.yml](.github/workflows/maven-central.yml), [relea
 
 On failure, retain the request and business record identifiers, inspect the owning controller/service and downstream status, then verify the current persisted state before retrying. Distinguish invalid input, denied access, missing records, and unavailable infrastructure. Avoid replaying a financial or externally visible action until its prior effect is known. For persistent modules, review the migration history and use the deployment rollback procedure; do not erase records to recover a failed request.
 
-Database evolution is represented by 31 migration files in [core-common-reference-master-data-models/src/main/resources/db/migration](core-common-reference-master-data-models/src/main/resources/db/migration/). Review the last applied migration and the owning entity before diagnosing a schema mismatch.
+Database evolution is represented by 36 migration files in [core-common-reference-master-data-models/src/main/resources/db/migration](core-common-reference-master-data-models/src/main/resources/db/migration/). Review the last applied migration and the owning entity before diagnosing a schema mismatch.
 
 Existing test scenarios provide concrete starting points for failure reproduction:
 
@@ -295,7 +295,7 @@ Documentation generation checks source freshness and local references. It does n
 ## Further reading, contribution, and license
 
 - [Currency execution policy publications](docs/currency-execution-policies.md)
-- [Insurance reference commands and security configuration](docs/insurance-reference-commands.md)
+- [Insurance reference commands, CURRENT and sandbox-source configuration](docs/insurance-reference-commands.md)
 - [Publish document layouts and legal-notice associations](docs/document-layout-publications.md)
 - [Immutable document template revisions](docs/document-template-revisions.md)
 - [Sandbox financial stationery](sandbox/documents/README.md)
