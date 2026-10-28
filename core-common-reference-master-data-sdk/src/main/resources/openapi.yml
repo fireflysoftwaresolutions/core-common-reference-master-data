@@ -7773,6 +7773,64 @@ paths:
               schema:
                 $ref: "#/components/schemas/DocumentLayoutPublicationDTO"
       x-disable-idempotency: true
+  /api/v1/currency-execution-policies/{policyId}/current:
+    get:
+      tags:
+      - currency-policy-current-controller
+      summary: Observe an exact finite currently usable representation; not financial
+        authority
+      operationId: observeCurrentCurrencyExecutionPolicy
+      parameters:
+      - name: policyId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: currencyId
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: isoCode
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: version
+        in: query
+        required: true
+        schema:
+          minimum: 1
+          type: integer
+          format: int64
+      - name: digest
+        in: query
+        required: true
+        schema:
+          maxLength: 64
+          minLength: 64
+          pattern: "^[0-9a-f]{64}(?![\\s\\S])"
+          type: string
+      - name: encodingVersion
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: postedScale
+        in: query
+        required: true
+        schema:
+          maximum: 10
+          minimum: 0
+          type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurrencyPolicyCurrent"
+      x-disable-idempotency: true
   /api/v1/currency-execution-policies/{policyId}:
     get:
       tags:
@@ -10704,6 +10762,35 @@ components:
           $ref: "#/components/schemas/DocumentLayoutExpectedDraftReference"
         sourceSnapshotCanonicalJson:
           type: string
+      additionalProperties: false
+    CurrencyPolicyCurrent:
+      required:
+      - effectiveUntil
+      - publication
+      - recordedAt
+      - target
+      type: object
+      properties:
+        target:
+          $ref: "#/components/schemas/CurrencyPolicyCurrentTarget"
+        publication:
+          $ref: "#/components/schemas/CurrencyPolicyView"
+        recordedAt:
+          $ref: "#/components/schemas/FireflyInstant"
+        effectiveUntil:
+          $ref: "#/components/schemas/FireflyInstant"
+      additionalProperties: false
+    CurrencyPolicyCurrentTarget:
+      required:
+      - postedScale
+      - reference
+      type: object
+      properties:
+        reference:
+          $ref: "#/components/schemas/CurrencyPolicyReference"
+        postedScale:
+          type: integer
+          format: int32
       additionalProperties: false
     CurrencyPolicySourceObservation:
       type: object

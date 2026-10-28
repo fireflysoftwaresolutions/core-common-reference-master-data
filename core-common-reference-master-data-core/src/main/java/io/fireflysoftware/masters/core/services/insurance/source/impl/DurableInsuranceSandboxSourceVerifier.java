@@ -22,9 +22,10 @@ public final class DurableInsuranceSandboxSourceVerifier implements InsuranceRef
         first.budget().remaining();String digest=InsuranceReferenceCodec.digest(expected);if(!digest.equals(first.definitionDigest()))throw InsuranceSandboxSourceRules.unavailable();
         Mono<CurrencyChecked> checked;Instant currencyUntil;
         if(expected.definition() instanceof PremiumTax tax){long before=nanos.getAsLong();Instant observed=clock.instant();currencyUntil=minimum(first.effectiveUntil(),observed.plusSeconds(5));
-            checked=currency.observe(tax.currencyPolicy(),tax.postedScale(),first.budget()).switchIfEmpty(Mono.error(InsuranceSandboxSourceRules.unavailable())).timeout(first.budget().remaining()).map(value->{
-                if(!tax.currencyPolicy().equals(value.policy().reference())||!Objects.equals(tax.postedScale(),value.policy().postedScale()))throw InsuranceSandboxSourceRules.unavailable();
-                Instant until=minimum(currencyUntil,value.policy().effectiveToEpochMillis()==null?null:Instant.ofEpochMilli(value.policy().effectiveToEpochMillis()));
+            checked=currency.observeCurrent(new io.fireflysoftware.masters.interfaces.dtos.currency.policy.CurrencyPolicyCurrentContracts.Target(tax.currencyPolicy(),tax.postedScale()),
+                    new CurrencyPolicyCurrentObservationService.OriginalBudget(first.budget(),first.effectiveUntil())).switchIfEmpty(Mono.error(InsuranceSandboxSourceRules.unavailable())).timeout(first.budget().remaining()).map(value->{
+                if(!tax.currencyPolicy().equals(value.value().publication().reference())||!Objects.equals(tax.postedScale(),value.value().publication().postedScale()))throw InsuranceSandboxSourceRules.unavailable();
+                Instant until=minimum(currencyUntil,value.absoluteUntil(),value.value().effectiveUntil(),value.value().publication().effectiveToEpochMillis()==null?null:Instant.ofEpochMilli(value.value().publication().effectiveToEpochMillis()));
                 return new CurrencyChecked(first.budget().intersect(value.budget()).intersect(R2dbcOperationBudget.observed(observed,until,before,Duration.ofSeconds(5),clock,nanos)),until);
             });
         }else{currencyUntil=first.effectiveUntil();checked=Mono.just(new CurrencyChecked(first.budget(),currencyUntil));}

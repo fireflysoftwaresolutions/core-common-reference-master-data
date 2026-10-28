@@ -28,7 +28,7 @@ class InsuranceReferenceCurrentObservationTest {
         final LongSupplier ticks=nanos::get;
         InsuranceReferenceContracts.Revision definition=InsuranceReferenceServiceTest.definition();
         SecurityPrincipal actor=principal("reader");int reads,policies,sourceCalls;int denyAt;boolean sourceAvailable=true;
-        boolean changeGeneration,changeActor,wrongDigest,withdrawn,sourceWrongDigest,currencyUnavailable,currencyWrong,interleavedClock;long finishAdvance;Instant sourceUntil=NOW.plusSeconds(3);Integer sourceScale;
+        boolean changeGeneration,changeActor,wrongDigest,withdrawn,sourceWrongDigest,currencyUnavailable,currencyWrong,interleavedClock;long finishAdvance;Instant sourceUntil=NOW.plusSeconds(3);Integer sourceScale;Instant currencyOriginalUntil;
         SecurityPrincipal principal(String subject){return new SecurityPrincipal(subject,ISSUER,"platform",Set.of(),Set.of(),Map.of("exp",NOW.plusSeconds(60)),null,null,Set.of(),Map.of());}
         Target target(){return new Target(definition.kind(),definition.recordId(),definition.publicationId(),definition.revision(),InsuranceReferenceCodec.digest(definition),0);}
         R2dbcOperationBudget budget(Instant until){return R2dbcOperationBudget.observed(NOW,until,0,Duration.ofSeconds(30),clock,ticks);}
@@ -46,17 +46,23 @@ class InsuranceReferenceCurrentObservationTest {
             InsuranceReferenceSourceVerifier source=d->{sourceCalls++;if(!sourceAvailable)return Mono.error(new IllegalStateException("controlled unavailable"));if(changeActor)actor=principal("other");if(finishAdvance!=0)nanos.addAndGet(finishAdvance);
                 var tax=d.definition() instanceof InsuranceReferenceContracts.PremiumTax t?t:null;
                 return Mono.just(new InsuranceReferenceSourceVerifier.Evidence(sourceWrongDigest?"f".repeat(64):InsuranceReferenceCodec.digest(d),tax==null?null:tax.currencyPolicy(),tax==null?null:sourceScale==null?tax.postedScale():sourceScale,NOW,sourceUntil));};
-            CurrencyPolicyCurrentObservationService currency=(expected,scale,original)->{
-                if(currencyUnavailable)return Mono.error(new IllegalStateException("controlled unavailable"));
-                var view=mock(io.fireflysoftware.masters.interfaces.dtos.currency.policy.CurrencyPolicyView.class);
-                when(view.reference()).thenReturn(currencyWrong?new io.fireflysoftware.masters.interfaces.dtos.currency.policy.CurrencyPolicyReference(expected.policyId(),expected.currencyId(),expected.isoCode(),expected.version()+1,expected.digest(),expected.encodingVersion()):expected);when(view.postedScale()).thenReturn(scale);when(view.effectiveToEpochMillis()).thenReturn(null);
-                return Mono.just(new CurrencyPolicyCurrentObservationService.Observation(view,original));};
+            CurrencyPolicyCurrentObservationService currency=new CurrencyPolicyCurrentObservationService(){
+                public Mono<Observation> observe(io.fireflysoftware.masters.interfaces.dtos.currency.policy.CurrencyPolicyReference ref,int scale,R2dbcOperationBudget original){throw new AssertionError("Strict paired current call required");}
+                public Mono<CurrentObservation> observeCurrent(io.fireflysoftware.masters.interfaces.dtos.currency.policy.CurrencyPolicyCurrentContracts.Target target,OriginalBudget original){
+                    currencyOriginalUntil=original.until();var expected=target.reference();int scale=target.postedScale();
+                    if(currencyUnavailable)return Mono.error(new IllegalStateException("controlled unavailable"));
+                    var view=mock(io.fireflysoftware.masters.interfaces.dtos.currency.policy.CurrencyPolicyView.class);
+                    when(view.reference()).thenReturn(currencyWrong?new io.fireflysoftware.masters.interfaces.dtos.currency.policy.CurrencyPolicyReference(expected.policyId(),expected.currencyId(),expected.isoCode(),expected.version()+1,expected.digest(),expected.encodingVersion()):expected);when(view.postedScale()).thenReturn(scale);when(view.effectiveToEpochMillis()).thenReturn(null);
+                    Instant until=NOW.plusMillis(100);var retained=original.budget().intersect(budget(until));
+                    return Mono.just(new CurrentObservation(new io.fireflysoftware.masters.interfaces.dtos.currency.policy.CurrencyPolicyCurrentContracts.Current(target,view,NOW,until),retained,until));
+                }
+            };
             return new InsuranceReferenceCurrentObservationServiceImpl(context,policy,Set.of(ISSUER),reader,source,currency,clock,ticks);
         }
     }
     @Test void currentObservationHasSeparateServiceAndImplementationRatherThanReceiptRecovery(){assertTrue(InsuranceReferenceCurrentObservationService.class.isInterface());assertTrue(InsuranceReferenceCurrentObservationService.class.isAssignableFrom(InsuranceReferenceCurrentObservationServiceImpl.class));}
     @Test void exactActiveWordingUsesTwoFreshSnapshotsAndIndependentCurrentPermission(){var h=new Harness();var value=h.service().observe(h.target()).block();assertNotNull(value);assertEquals(h.target(),value.value().reference());assertEquals(2,h.reads);assertEquals(1,h.sourceCalls);assertTrue(h.policies>=4);assertFalse(value.value().publication().effectiveUntil().isAfter(h.sourceUntil));}
-    @Test void currentTaxRequiresExactTypedCurrencyAndScaleBoundary(){var h=new Harness();h.definition=InsuranceReferenceCodec.decode(InsuranceReferenceCodecTest.fixture("PREMIUM_TAX").toString());assertNotNull(h.service().observe(h.target()).block());assertEquals(2,h.reads);h=new Harness();h.definition=InsuranceReferenceCodec.decode(InsuranceReferenceCodecTest.fixture("PREMIUM_TAX").toString());h.sourceScale=3;var bad=h;assertThrows(RuntimeException.class,()->bad.service().observe(bad.target()).block());}
+    @Test void currentTaxRequiresExactTypedCurrencyAndScaleBoundary(){var h=new Harness();h.definition=InsuranceReferenceCodec.decode(InsuranceReferenceCodecTest.fixture("PREMIUM_TAX").toString());var observed=h.service().observe(h.target()).block();assertNotNull(observed);assertEquals(h.sourceUntil.minusMillis(1),h.currencyOriginalUntil);assertFalse(observed.value().publication().effectiveUntil().isAfter(NOW.plusMillis(100)));assertEquals(2,h.reads);h=new Harness();h.definition=InsuranceReferenceCodec.decode(InsuranceReferenceCodecTest.fixture("PREMIUM_TAX").toString());h.sourceScale=3;var bad=h;assertThrows(RuntimeException.class,()->bad.service().observe(bad.target()).block());}
     @Test void restoredOrDifferentControlGenerationCannotSatisfyRetainedTarget(){var h=new Harness();h.changeGeneration=true;assertThrows(RuntimeException.class,()->h.service().observe(h.target()).block());assertEquals(2,h.reads);}
     @Test void withdrawnOrCorruptImmutableSnapshotWithholdsBody(){for(boolean withdrawn:List.of(false,true)){var h=new Harness();h.withdrawn=withdrawn;h.wrongDigest=!withdrawn;assertThrows(RuntimeException.class,()->h.service().observe(h.target()).block());assertEquals(0,h.sourceCalls);}}
     @Test void sourceUnavailableNeverPromotesHistoricalReceiptToCurrent(){var h=new Harness();h.sourceAvailable=false;assertThrows(RuntimeException.class,()->h.service().observe(h.target()).block());assertEquals(1,h.reads);}

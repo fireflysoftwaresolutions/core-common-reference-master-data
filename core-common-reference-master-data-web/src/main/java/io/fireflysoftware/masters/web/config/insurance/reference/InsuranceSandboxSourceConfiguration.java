@@ -48,9 +48,8 @@ public class InsuranceSandboxSourceConfiguration {
     }
     @Bean @ConditionalOnMissingBean(InsuranceReferenceSourceVerifier.class)
     InsuranceReferenceSourceVerifier durableInsuranceSandboxSourceVerifier(InsuranceSandboxFactReader reader,
-            InsuranceSandboxSourceResources resources,CurrencyExecutionPolicyService currencies,CurrencyPolicyAuthority currencyAuthority){
-        return new DurableInsuranceSandboxSourceVerifier(reader,new CurrencyPolicyCurrentObservationServiceImpl(
-            currencies,currencyAuthority,resources.clock,resources.nanos),resources.clock,resources.nanos);
+            InsuranceSandboxSourceResources resources,@org.springframework.beans.factory.annotation.Qualifier("currencyPolicyCurrentObservationFactory") org.springframework.beans.factory.ObjectProvider<io.fireflysoftware.masters.core.services.currency.observation.CurrencyPolicyCurrentObservationService.Factory> currencies){
+        return new DurableInsuranceSandboxSourceVerifier(reader,currencies.getIfAvailable(io.fireflysoftware.masters.core.services.currency.observation.CurrencyPolicyCurrentObservationService::unavailableFactory).create(resources.clock,resources.nanos),resources.clock,resources.nanos);
     }
     private static ConnectionPool pool(InsuranceReferenceSettings.Connection settings){
         var options=ConnectionFactoryOptions.parse(settings.url()).mutate().option(ConnectionFactoryOptions.USER,settings.username())

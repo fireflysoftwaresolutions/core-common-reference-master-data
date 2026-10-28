@@ -84,11 +84,12 @@ public final class InsuranceReferenceCurrentObservationServiceImpl implements In
                 if(definition.definition() instanceof InsuranceReferenceContracts.PremiumTax tax) {
                     if(!tax.currencyPolicy().equals(evidence.currencyPolicy()) || !Objects.equals(tax.postedScale(),evidence.postedScale()))throw unavailable();
                     long currencyBefore=nanos.getAsLong();Instant currencyStart=clock.instant();
-                    return currencies.observe(tax.currencyPolicy(),tax.postedScale(),bounded).switchIfEmpty(Mono.error(unavailable()))
+                    return currencies.observeCurrent(new io.fireflysoftware.masters.interfaces.dtos.currency.policy.CurrencyPolicyCurrentContracts.Target(tax.currencyPolicy(),tax.postedScale()),
+                            new CurrencyPolicyCurrentObservationService.OriginalBudget(bounded,sourceUntil)).switchIfEmpty(Mono.error(unavailable()))
                         .timeout(bounded.remaining()).map(value->{
-                            if(!tax.currencyPolicy().equals(value.policy().reference()) || !Objects.equals(tax.postedScale(),value.policy().postedScale()))throw unavailable();
+                            if(!tax.currencyPolicy().equals(value.value().publication().reference()) || !Objects.equals(tax.postedScale(),value.value().publication().postedScale()))throw unavailable();
                             var retained=bounded.intersect(value.budget());Instant currencyUntil=minimum(sourceUntil,currencyStart.plusSeconds(5),
-                                value.policy().effectiveToEpochMillis()==null?null:Instant.ofEpochMilli(value.policy().effectiveToEpochMillis()));
+                                value.absoluteUntil(),value.value().effectiveUntil(),value.value().publication().effectiveToEpochMillis()==null?null:Instant.ofEpochMilli(value.value().publication().effectiveToEpochMillis()));
                             retained=retained.intersect(R2dbcOperationBudget.observed(currencyStart,currencyUntil,currencyBefore,Duration.ofSeconds(5),clock,nanos));
                             return new Checked(definition,retained,currencyUntil);
                         });

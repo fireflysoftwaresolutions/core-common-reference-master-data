@@ -49,10 +49,10 @@ public class InsuranceReferenceCurrentConfiguration {
     @Bean InsuranceReferenceCurrentObservationService insuranceReferenceCurrentObservationService(InsuranceReferenceCurrentSettings settings,
             @org.springframework.beans.factory.annotation.Qualifier("insuranceReferenceCurrentSecurity") CurrentSecurity security,
             InsuranceReferenceCurrentResources resources,ObjectProvider<InsuranceReferenceSourceVerifier> source,
-            CurrencyExecutionPolicyService currencies,CurrencyPolicyAuthority currencyAuthority) {
+            @org.springframework.beans.factory.annotation.Qualifier("currencyPolicyCurrentObservationFactory") ObjectProvider<io.fireflysoftware.masters.core.services.currency.observation.CurrencyPolicyCurrentObservationService.Factory> currencies) {
         return new InsuranceReferenceCurrentObservationServiceImpl(security.contexts(),security.decisions(),settings.issuers(),resources.reader,
             source.getIfAvailable(InsuranceReferenceSourceVerifier::unavailable),
-            new CurrencyPolicyCurrentObservationServiceImpl(currencies,currencyAuthority,resources.clock,resources.nanos),resources.clock,resources.nanos);
+            currencies.getIfAvailable(io.fireflysoftware.masters.core.services.currency.observation.CurrencyPolicyCurrentObservationService::unavailableFactory).create(resources.clock,resources.nanos),resources.clock,resources.nanos);
     }
     record CurrentSecurity(SecurityContextPort contexts,PolicyDecisionPort decisions) {}
     private static IllegalStateException unavailable(){return new IllegalStateException("INSURANCE_REFERENCE_CURRENT_CONFIGURATION_REQUIRED");}

@@ -53,7 +53,7 @@ public class CurrencyPolicyAuthority {
                                     environment.getProperty(STRICT_POLICY, Boolean.class)))
                                 return Mono.error(forbidden());
                             CurrencyPolicyRules.uuid(currencyId);
-                            if (!Set.of("source.read", "publish", "read", "retire")
+                            if (!Set.of("source.read", "publish", "read", "retire", "current")
                                     .contains(operation)) return Mono.error(forbidden());
                             var context = contexts.getIfAvailable();
                             var policy = policies.getIfAvailable();
