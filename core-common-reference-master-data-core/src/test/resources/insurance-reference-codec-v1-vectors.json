@@ -1,0 +1,24 @@
+{
+  "scope" : "PURE_ENCODING_NOT_AUTHORITY_OR_CURRENT",
+  "qualifiedCoreSha256" : "ec34b17e77ff4d838123c71c9eb864f798f6c0891150a900f4b1712a6c585020",
+  "parentConsumerCoreAbsent" : true,
+  "cases" : {
+    "PREMIUM_TAX" : {
+      "canonical" : "{\"code\":\"SANDBOX_REFERENCE\",\"definition\":{\"applicability\":{\"events\":[\"NEW_BUSINESS\"],\"jurisdictions\":[\"US\"],\"productProfiles\":[\"TERM_PC_INSURANCE_V1\"]},\"basis\":\"NET_PREMIUM_EXCLUSIVE\",\"currencyPolicy\":{\"currencyId\":\"10000000-0000-4000-8000-000000000006\",\"digest\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"encodingVersion\":\"MASTERS_CURRENCY_POLICY_V1\",\"isoCode\":\"USD\",\"policyId\":\"10000000-0000-4000-8000-000000000005\",\"version\":7},\"postedScale\":2,\"ratePartsPerMillion\":333333,\"roundingMode\":\"HALF_EVEN\"},\"effectiveFrom\":\"2026-10-27T00:00:00.123456Z\",\"effectiveUntil\":\"2026-10-28T00:00:00.654321Z\",\"encodingVersion\":\"MASTERS_INSURANCE_REFERENCE_V1\",\"kind\":\"PREMIUM_TAX\",\"provenance\":{\"origin\":\"SANDBOX\",\"rightsReference\":\"urn:codec:rights\",\"sourceDigest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"sourceReference\":\"urn:codec:source\",\"versionText\":\"v1\"},\"publicationId\":\"10000000-0000-4000-8000-000000000002\",\"recordId\":\"10000000-0000-4000-8000-000000000001\",\"revision\":1,\"scope\":\"GLOBAL_MASTER\"}",
+      "digest" : "d10a61632491a36c51a7a6bee8f278bb9d9c27545ad4b69520f760ad34a9e1a0",
+      "utf8Bytes" : 1045
+    },
+    "COVERAGE_WORDING" : {
+      "canonical" : "{\"code\":\"SANDBOX_REFERENCE\",\"definition\":{\"applicability\":{\"events\":[\"NEW_BUSINESS\"],\"jurisdictions\":[\"US\"],\"productProfiles\":[\"TERM_PC_INSURANCE_V1\"]},\"content\":\"COVERAGE_WORDING ñ\\nLine with a tab\\tand \\\"quotes\\\".\",\"localeCode\":\"en-US\",\"localeId\":\"10000000-0000-4000-8000-000000000004\",\"mediaType\":\"text/plain\"},\"effectiveFrom\":\"2026-10-27T00:00:00.123456Z\",\"effectiveUntil\":\"2026-10-28T00:00:00.654321Z\",\"encodingVersion\":\"MASTERS_INSURANCE_REFERENCE_V1\",\"kind\":\"COVERAGE_WORDING\",\"provenance\":{\"origin\":\"SANDBOX\",\"rightsReference\":\"urn:codec:rights\",\"sourceDigest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"sourceReference\":\"urn:codec:source\",\"versionText\":\"v1\"},\"publicationId\":\"10000000-0000-4000-8000-000000000002\",\"recordId\":\"10000000-0000-4000-8000-000000000001\",\"revision\":1,\"scope\":\"GLOBAL_MASTER\"}",
+      "digest" : "282ba2048e5f3dc56c11331c7a9eb4fd96a8621653c7d9d045b2f229656399b3",
+      "utf8Bytes" : 836,
+      "contentDigest" : "ea5466e726de59e5a472fe72a612917437b399767326d934c8a4441b0d1be9cb"
+    },
+    "EXCLUSION_WORDING" : {
+      "canonical" : "{\"code\":\"SANDBOX_REFERENCE\",\"definition\":{\"applicability\":{\"events\":[\"NEW_BUSINESS\"],\"jurisdictions\":[\"US\"],\"productProfiles\":[\"TERM_PC_INSURANCE_V1\"]},\"content\":\"EXCLUSION_WORDING ñ\\nLine with a tab\\tand \\\"quotes\\\".\",\"localeCode\":\"en-US\",\"localeId\":\"10000000-0000-4000-8000-000000000004\",\"mediaType\":\"text/plain\"},\"effectiveFrom\":\"2026-10-27T00:00:00.123456Z\",\"effectiveUntil\":null,\"encodingVersion\":\"MASTERS_INSURANCE_REFERENCE_V1\",\"kind\":\"EXCLUSION_WORDING\",\"provenance\":{\"origin\":\"SANDBOX\",\"rightsReference\":\"urn:codec:rights\",\"sourceDigest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"sourceReference\":\"urn:codec:source\",\"versionText\":\"v1\"},\"publicationId\":\"10000000-0000-4000-8000-000000000002\",\"recordId\":\"10000000-0000-4000-8000-000000000001\",\"revision\":1,\"scope\":\"GLOBAL_MASTER\"}",
+      "digest" : "aa92db346080992e53963aa1524379ee8dc01d95edd0032bc02c672cbd600af9",
+      "utf8Bytes" : 813,
+      "contentDigest" : "d10b3e585710b6652918aaa9af788159bfbe2272b5f0ad83e18ed83cbb7e8f28"
+    }
+  }
+}
