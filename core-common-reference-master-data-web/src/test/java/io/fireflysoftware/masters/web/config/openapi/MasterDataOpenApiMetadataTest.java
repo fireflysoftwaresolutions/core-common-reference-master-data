@@ -14,6 +14,14 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class MasterDataOpenApiMetadataTest {
+    @Test void anAdditionalOriginalOperationRetainsItsMetadataWhenSourceRoutesAreCompleted() {
+        var original = new Operation().operationId("additionalOriginalOperation")
+                .summary("Retained original metadata").addTagsItem("original");
+        var api = new OpenAPI().paths(new Paths().addPathItem("/original-added-route", new PathItem().get(original)));
+        verifySourceRoutes(api);
+        assertSame(original, api.getPaths().get("/original-added-route").getGet());
+    }
+
     @Test void globalBearerCoversEveryOriginalAndSourceDeclaredCommandOperation() throws Exception {
         var explicitSourceRoot = System.getProperty("source.root");
         java.nio.file.Path ownerRoot;
@@ -46,44 +54,84 @@ class MasterDataOpenApiMetadataTest {
         verifySourceRoutes(currentOnly);
     }
 
-    private static void verifySourceRoutes(OpenAPI api) {
-        int legacy=api.getPaths().entrySet().stream().filter(entry->!entry.getKey().startsWith("/api/v1/insurance-references"))
-                .mapToInt(entry->entry.getValue().readOperations().size()).sum();
-        assertEquals(201,legacy);
-        int declared=0;
-        var expectedRoutes=new java.util.HashSet<String>();
-        for(var controller:List.of(io.fireflysoftware.masters.web.controllers.insurance.reference.InsuranceReferenceController.class,
+    private record DeclaredRoute(PathItem.HttpMethod verb, String path, String operationId) {}
+
+    private static java.util.Map<String, DeclaredRoute> declaredRoutes() {
+        var routes = new java.util.LinkedHashMap<String, DeclaredRoute>();
+        for (var controller : List.of(
+                io.fireflysoftware.masters.web.controllers.insurance.reference.InsuranceReferenceController.class,
                 io.fireflysoftware.masters.web.controllers.insurance.reference.InsuranceReferenceCurrentController.class,
-                io.fireflysoftware.masters.web.controllers.insurance.reference.InsuranceSandboxFactController.class)) {
-            var prefix=controller.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class).value()[0];
-            for(var method:controller.getDeclaredMethods()) {
-                var post=method.getAnnotation(org.springframework.web.bind.annotation.PostMapping.class);
-                var get=method.getAnnotation(org.springframework.web.bind.annotation.GetMapping.class);
-                if(post==null&&get==null)continue;
-                String route=prefix+(post==null?get.value()[0]:post.value()[0]);
-                var verb=post==null?PathItem.HttpMethod.GET:PathItem.HttpMethod.POST;
-                var id=method.getAnnotation(io.swagger.v3.oas.annotations.Operation.class).operationId();
-                var path=api.getPaths().computeIfAbsent(route,ignored->new PathItem());
-                var existing=path.readOperationsMap().get(verb);
-                if(existing==null)path.operation(verb,new Operation().operationId(id));else assertEquals(id,existing.getOperationId());
-                expectedRoutes.add(verb+" "+route);declared++;
+                io.fireflysoftware.masters.web.controllers.insurance.reference.InsuranceSandboxFactController.class,
+                io.fireflysoftware.masters.web.controllers.document.observation.DocumentReferenceCurrentController.class)) {
+            var root = org.springframework.core.annotation.AnnotatedElementUtils.findMergedAnnotation(
+                    controller, org.springframework.web.bind.annotation.RequestMapping.class);
+            assertNotNull(root);
+            var prefixes = root.path().length == 0 ? new String[]{""} : root.path();
+            for (var method : controller.getDeclaredMethods()) {
+                var mapping = org.springframework.core.annotation.AnnotatedElementUtils.findMergedAnnotation(
+                        method, org.springframework.web.bind.annotation.RequestMapping.class);
+                if (mapping == null) continue;
+                var operation = method.getAnnotation(io.swagger.v3.oas.annotations.Operation.class);
+                assertNotNull(operation);
+                assertFalse(operation.operationId().isBlank());
+                assertTrue(mapping.method().length > 0);
+                var suffixes = mapping.path().length == 0 ? new String[]{""} : mapping.path();
+                for (var prefix : prefixes) for (var suffix : suffixes) for (var requestMethod : mapping.method()) {
+                    var verb = PathItem.HttpMethod.valueOf(requestMethod.name());
+                    var route = new DeclaredRoute(verb, prefix + suffix, operation.operationId());
+                    assertNull(routes.put(verb + " " + route.path(), route));
+                }
             }
         }
-        assertEquals(11,declared);
-        for(var entry:api.getPaths().entrySet())if(entry.getKey().startsWith("/api/v1/insurance-references"))
-            for(var verb:entry.getValue().readOperationsMap().keySet())assertTrue(expectedRoutes.contains(verb+" "+entry.getKey()));
-        new MasterDataOpenApiMetadataConfiguration().masterDataBearerOpenApiCustomizer().customise(api);
-        assertEquals(SecurityScheme.Type.HTTP,api.getComponents().getSecuritySchemes().get("bearerAuth").getType());
-        assertEquals("bearer",api.getComponents().getSecuritySchemes().get("bearerAuth").getScheme());
-        int protectedOperations=0;
-        for(var path:api.getPaths().values())for(var operation:path.readOperations()){
-            var effective=operation.getSecurity()==null?api.getSecurity():operation.getSecurity();
-            assertFalse(effective.isEmpty());assertTrue(effective.stream().allMatch(requirement->requirement.containsKey("bearerAuth")));protectedOperations++;
+        var documentCurrent = routes.get("POST /api/v1/document-reference-current-observations");
+        assertNotNull(documentCurrent);
+        assertEquals("observeCurrentDocumentReferences", documentCurrent.operationId());
+        return routes;
+    }
+
+    private static java.util.Map<String, Operation> operations(OpenAPI api) {
+        var result = new java.util.LinkedHashMap<String, Operation>();
+        api.getPaths().forEach((path, item) -> item.readOperationsMap()
+                .forEach((verb, operation) -> result.put(verb + " " + path, operation)));
+        return result;
+    }
+
+    private static com.fasterxml.jackson.databind.JsonNode metadataWithoutSecurity(Operation operation) {
+        var metadata = (com.fasterxml.jackson.databind.node.ObjectNode)
+                io.swagger.v3.core.util.Json.mapper().valueToTree(operation);
+        metadata.remove("security");
+        return metadata;
+    }
+
+    private static void verifySourceRoutes(OpenAPI api) {
+        var baseline = new java.util.LinkedHashMap<String, com.fasterxml.jackson.databind.JsonNode>();
+        operations(api).forEach((route, operation) -> baseline.put(route, metadataWithoutSecurity(operation)));
+        var declared = declaredRoutes();
+        for (var route : declared.values()) {
+            var path = api.getPaths().computeIfAbsent(route.path(), ignored -> new PathItem());
+            var existing = path.readOperationsMap().get(route.verb());
+            if (existing == null) path.operation(route.verb(), new Operation().operationId(route.operationId()));
+            else assertEquals(route.operationId(), existing.getOperationId());
         }
-        assertEquals(212,protectedOperations);
-        var before=io.swagger.v3.core.util.Json.pretty(api);
+        var expected = new java.util.HashSet<>(baseline.keySet());
+        expected.addAll(declared.keySet());
         new MasterDataOpenApiMetadataConfiguration().masterDataBearerOpenApiCustomizer().customise(api);
-        assertEquals(before,io.swagger.v3.core.util.Json.pretty(api));
+        var actual = operations(api);
+        assertEquals(expected, actual.keySet());
+        baseline.forEach((route, metadata) -> assertEquals(metadata, metadataWithoutSecurity(actual.get(route)), route));
+        declared.forEach((route, declaration) -> assertEquals(declaration.operationId(), actual.get(route).getOperationId(), route));
+        assertEquals(SecurityScheme.Type.HTTP, api.getComponents().getSecuritySchemes().get("bearerAuth").getType());
+        assertEquals("bearer", api.getComponents().getSecuritySchemes().get("bearerAuth").getScheme());
+        assertEquals("JWT", api.getComponents().getSecuritySchemes().get("bearerAuth").getBearerFormat());
+        for (var operation : actual.values()) {
+            var effective = operation.getSecurity() == null ? api.getSecurity() : operation.getSecurity();
+            assertNotNull(effective);
+            assertFalse(effective.isEmpty());
+            assertTrue(effective.stream().allMatch(requirement -> requirement.containsKey("bearerAuth")));
+        }
+        var before = io.swagger.v3.core.util.Json.pretty(api);
+        new MasterDataOpenApiMetadataConfiguration().masterDataBearerOpenApiCustomizer().customise(api);
+        assertEquals(before, io.swagger.v3.core.util.Json.pretty(api));
     }
 
     @Test void existingOperationOverridesCannotLeaveAnAnonymousOrAlternativeAuthBranch() {

@@ -38,6 +38,13 @@ public class MasterDataOpenApiMetadataConfiguration {
         };
     }
 
+    @Bean("documentReferenceCurrentMetadataController")
+    @org.springframework.context.annotation.Profile("openapi-gen")
+    public io.fireflysoftware.masters.web.controllers.document.observation.DocumentReferenceCurrentController documentReferenceCurrentMetadataController() {
+        io.fireflysoftware.masters.core.services.document.observation.DocumentReferenceCurrentService unavailable = (target, original) -> reactor.core.publisher.Mono.error(new io.fireflysoftware.masters.core.services.document.observation.DocumentReferenceCurrentFailure(io.fireflysoftware.masters.core.services.document.observation.DocumentReferenceCurrentFailure.Kind.UNAVAILABLE));
+        return new io.fireflysoftware.masters.web.controllers.document.observation.DocumentReferenceCurrentController(unavailable);
+    }
+
     private static List<SecurityRequirement> requireBearer(List<SecurityRequirement> original) {
         if (original == null || original.isEmpty()) return List.of(new SecurityRequirement().addList(BEARER));
         var result = new ArrayList<SecurityRequirement>();
