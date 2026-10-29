@@ -207,5 +207,38 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>capture-original-openapi-receipt</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>openapi-start</id>
+                                <configuration>
+                                    <arguments combine.children="append">
+                                        <argument>--firefly.openapi.capture.enabled=true</argument>
+                                        <argument>--firefly.openapi.capture.directory=${firefly.openapi.capture.directory}</argument>
+                                        <argument>--firefly.openapi.capture.source-sha=${firefly.openapi.capture.source-sha}</argument>
+                                        <argument>--firefly.openapi.capture.invocation=${firefly.openapi.capture.invocation}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.springdoc</groupId>
+                        <artifactId>springdoc-openapi-maven-plugin</artifactId>
+                        <configuration>
+                            <headers>
+                                <X-Firefly-OpenAPI-Capture>${firefly.openapi.capture.invocation}</X-Firefly-OpenAPI-Capture>
+                            </headers>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 </project>

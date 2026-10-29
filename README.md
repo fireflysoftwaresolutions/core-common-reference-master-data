@@ -294,6 +294,7 @@ Documentation generation checks source freshness and local references. It does n
 
 ## Further reading, contribution, and license
 
+- [Original OpenAPI capture receipt prerequisite](docs/original-openapi-capture.md)
 - [Currency execution policy publications](docs/currency-execution-policies.md)
 - [Insurance reference commands, CURRENT and sandbox-source configuration](docs/insurance-reference-commands.md)
 - [Publish document layouts and legal-notice associations](docs/document-layout-publications.md)

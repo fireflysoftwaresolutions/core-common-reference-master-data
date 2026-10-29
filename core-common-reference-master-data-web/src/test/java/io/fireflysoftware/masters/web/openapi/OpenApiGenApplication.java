@@ -21,6 +21,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import io.fireflysoftware.masters.web.config.openapi.MasterDataOpenApiMetadataConfiguration;
+import io.fireflysoftware.masters.web.openapi.capture.OriginalOpenApiCaptureConfiguration;
 
 /**
  * Minimal Spring Boot application used only during the Maven build to expose
@@ -33,7 +34,7 @@ import io.fireflysoftware.masters.web.config.openapi.MasterDataOpenApiMetadataCo
  * Maven profile with {@code useTestClasspath=true}.
  */
 @EnableOpenApiGen
-@Import(MasterDataOpenApiMetadataConfiguration.class)
+@Import({MasterDataOpenApiMetadataConfiguration.class, OriginalOpenApiCaptureConfiguration.class})
 @ComponentScan(basePackages = "io.fireflysoftware.masters.web.controllers")
 public class OpenApiGenApplication {
     public static void main(String[] args) {
