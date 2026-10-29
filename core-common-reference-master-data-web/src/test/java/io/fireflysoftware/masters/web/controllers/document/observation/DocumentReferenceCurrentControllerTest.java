@@ -1,0 +1,26 @@
+/* Copyright 2026 Firefly Software Foundation. Licensed under the Apache License, Version 2.0. */
+package io.fireflysoftware.masters.web.controllers.document.observation;
+import static org.junit.jupiter.api.Assertions.*;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import io.fireflysoftware.masters.core.services.document.observation.*;
+import io.fireflysoftware.masters.web.config.openapi.MasterDataOpenApiMetadataConfiguration;
+import io.swagger.v3.core.converter.*;
+import io.fireflysoftware.masters.interfaces.dtos.document.observation.DocumentReferenceCurrentContracts.*;
+import reactor.core.publisher.Mono;
+
+class DocumentReferenceCurrentControllerTest {
+    final AtomicInteger calls=new AtomicInteger();
+    final DocumentReferenceCurrentService unavailable=new DocumentReferenceCurrentService(){public Mono<Observation> observeCurrent(Target target,OriginalBudget original){throw new AssertionError();}public Mono<Observation> observeCurrent(Target target){calls.incrementAndGet();return Mono.error(new DocumentReferenceCurrentFailure(DocumentReferenceCurrentFailure.Kind.UNAVAILABLE));}};
+    String valid(){String id="11111111-1111-4111-8111-111111111111";return "{\"product\":{\"tenantId\":\""+id+"\",\"rootId\":\""+id+"\",\"productId\":\""+id+"\",\"revisionId\":\""+id+"\",\"publicationId\":\""+id+"\",\"definitionDigest\":\""+"1".repeat(64)+"\"},\"purpose\":\"DEPOSIT_ACCOUNT_ENROLLMENT\",\"documentType\":\"CONTRACT\",\"locale\":\"en-US\",\"template\":"+reference(id,"DOCUMENT_TEMPLATE")+",\"layout\":"+reference("22222222-2222-4222-8222-222222222222","DOCUMENT_LAYOUT")+"}";}
+    String reference(String id,String kind){return "{\"owner\":\"core-common-reference-master-data\",\"kind\":\""+kind+"\",\"id\":\""+id+"\",\"versionFormat\":\"OPAQUE\",\"versionText\":\"release.01\",\"digest\":\""+"a".repeat(64)+"\"}";}
+    @Test void exactTargetReachesUnavailableOwnerWithoutInventingSuccess(){var value=new DocumentReferenceCurrentController(unavailable).current(valid()).block();assertEquals(503,value.getStatusCode().value());assertEquals("no-store",value.getHeaders().getCacheControl());assertEquals(1,calls.get());}
+    @Test void unknownDuplicateTrailingAndScalarCoercionRefuseBeforeOwner(){for(String bad:List.of(valid().replace("{\"product\"","{\"extra\":true,\"product\""),valid().replace("\"locale\":\"en-US\"","\"locale\":\"en-US\",\"locale\":\"en-US\""),valid()+" {}",valid().replace("\"release.01\"","1"),"null","[]",valid().replace("\"en-US\"","null"))){var value=new DocumentReferenceCurrentController(unavailable).current(bad).block();assertEquals(400,value.getStatusCode().value());assertEquals("no-store",value.getHeaders().getCacheControl());}assertEquals(0,calls.get());}
+    @Test void payloadBytesBoundedBeforeOwner(){assertEquals(400,new DocumentReferenceCurrentController(unavailable).current(" ".repeat(8193)).block().getStatusCode().value());assertEquals(0,calls.get());}
+    @Test void nativeNotCurrentAndForbiddenHaveDistinctSafeNoStoreCodes(){for(var kind:List.of(DocumentReferenceCurrentFailure.Kind.NOT_CURRENT,DocumentReferenceCurrentFailure.Kind.FORBIDDEN)){var controller=new DocumentReferenceCurrentController(new DocumentReferenceCurrentService(){public Mono<Observation> observeCurrent(Target target,OriginalBudget original){return Mono.error(new DocumentReferenceCurrentFailure(kind));}public Mono<Observation> observeCurrent(Target target){return Mono.error(new DocumentReferenceCurrentFailure(kind));}});var value=controller.current(valid()).block();assertEquals(kind==DocumentReferenceCurrentFailure.Kind.NOT_CURRENT?409:403,value.getStatusCode().value());assertEquals("no-store",value.getHeaders().getCacheControl());}}
+    @Test void originalMetadataDeclarationDiscoversActualControllerWithoutNativeBeans(){try(var context=new AnnotationConfigApplicationContext()){context.getEnvironment().setActiveProfiles("openapi-gen");context.register(MasterDataOpenApiMetadataConfiguration.class);context.refresh();var controller=context.getBean(DocumentReferenceCurrentController.class);assertEquals(503,controller.current(valid()).block().getStatusCode().value());assertTrue(context.getBeansOfType(io.r2dbc.spi.ConnectionFactory.class).isEmpty());assertTrue(context.getBeansOfType(DocumentReferenceCurrentNativeContext.class).isEmpty());}}
+    @Test void metadataDeclarationIsAbsentFromOrdinaryRuntime(){try(var context=new AnnotationConfigApplicationContext()){context.register(MasterDataOpenApiMetadataConfiguration.class);context.refresh();assertTrue(context.getBeansOfType(DocumentReferenceCurrentController.class).isEmpty());}}
+    @Test void currentSchemasHaveDistinctNamesAndExactOpaqueFields(){var models=new ModelConverters();var result=models.resolveAsResolvedSchema(new AnnotatedType(Current.class).resolveAsRef(true));assertEquals("#/components/schemas/DocumentReferenceCurrent",result.schema.get$ref());assertEquals("#/components/schemas/DocumentReferenceCurrentTarget",((io.swagger.v3.oas.models.media.Schema<?>)result.referencedSchemas.get("DocumentReferenceCurrent").getProperties().get("target")).get$ref());assertTrue(result.referencedSchemas.get("DocumentReferenceExact").getProperties().containsKey("versionText"));}
+}

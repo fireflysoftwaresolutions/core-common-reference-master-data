@@ -1,0 +1,31 @@
+{
+  "documentReference": "DEMO-INSURANCE-PREMIUM-INVOICE",
+  "issuedOn": "2026-10-01",
+  "partyName": "Northbridge Example Studio LLC",
+  "resourceReference": "DEMO-001",
+  "currency": "USD",
+  "invoiceNumber": "DEMO-INV-1024",
+  "policyNumber": "DEMO-PROP-1024",
+  "dueDate": "2026-10-15",
+  "subtotal": "1800.00",
+  "tax": "160.00",
+  "total": "1960.00",
+  "paid": "0.00",
+  "outstanding": "1960.00",
+  "paymentReference": "DEMO-INV-1024",
+  "paymentInstructions": "Use the explicitly configured sandbox payment channel; no real bank account is provided",
+  "charges": [
+    {
+      "description": "Buildings annual premium",
+      "amount": "1200.00"
+    },
+    {
+      "description": "Business contents annual premium",
+      "amount": "350.00"
+    },
+    {
+      "description": "Business interruption annual premium",
+      "amount": "250.00"
+    }
+  ]
+}

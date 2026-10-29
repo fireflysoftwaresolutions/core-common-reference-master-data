@@ -1,0 +1,195 @@
+{
+  "scope": "SANDBOX_ONLY",
+  "localeCode": "en-US",
+  "mediaType": "text/html",
+  "styleContent": "",
+  "version": "1.0.0",
+  "renderingBoundary": "Restricted XHTML fragments; the branded multipage preview is a separate controlled print-profile design, not an existing PDF generation API.",
+  "templates": [
+    {
+      "templateCode": "SBX_BANK_ACCOUNT_STATEMENT",
+      "templateName": "Account statement",
+      "category": "BANKING",
+      "documentPurpose": "ACCOUNT_STATEMENT",
+      "documentType": "REPORT",
+      "version": "1.0.0",
+      "factsContractCode": "ACCOUNT_STATEMENT",
+      "factsContractVersion": "1",
+      "template": "templates/bank_account_statement.ftlh",
+      "schema": "schemas/bank_account_statement.json",
+      "example": "examples/bank_account_statement.json",
+      "businessPrerequisites": [
+        "Authorized account facts snapshot and reconciled booked movements",
+        "Approved statement period and product disclosures",
+        "Exact published master revision and tenant binding"
+      ],
+      "layoutProfile": "FIREFLY_SANDBOX_PRINT_PREVIEW_V1"
+    },
+    {
+      "templateCode": "SBX_LOAN_AGREEMENT",
+      "templateName": "Installment loan agreement",
+      "category": "LENDING",
+      "documentPurpose": "LOAN_AGREEMENT",
+      "documentType": "CONTRACT",
+      "version": "1.0.0",
+      "factsContractCode": "LOAN_AGREEMENT",
+      "factsContractVersion": "1",
+      "template": "templates/loan_agreement.ftlh",
+      "schema": "schemas/loan_agreement.json",
+      "example": "examples/loan_agreement.json",
+      "businessPrerequisites": [
+        "Approved loan/party/contract association and exact pricing/terms",
+        "Reconciled authoritative repayment schedule",
+        "Verified consent and separate signature/disbursement workflows"
+      ],
+      "layoutProfile": "FIREFLY_SANDBOX_PRINT_PREVIEW_V1"
+    },
+    {
+      "templateCode": "SBX_INSURANCE_POLICY_DECLARATIONS",
+      "templateName": "Commercial property policy declarations",
+      "category": "INSURANCE",
+      "documentPurpose": "POLICY_DECLARATIONS",
+      "documentType": "CONTRACT",
+      "version": "1.0.0",
+      "factsContractCode": "POLICY_DECLARATIONS",
+      "factsContractVersion": "1",
+      "template": "templates/insurance_policy_declarations.ftlh",
+      "schema": "schemas/insurance_policy_declarations.json",
+      "example": "examples/insurance_policy_declarations.json",
+      "businessPrerequisites": [
+        "Authorized accepted underwriting and policy facts",
+        "Approved wording/coverage/exclusion/endorsement versions",
+        "Binding and premium conditions satisfied by their owning services"
+      ],
+      "layoutProfile": "FIREFLY_SANDBOX_PRINT_PREVIEW_V1"
+    },
+    {
+      "templateCode": "SBX_INSURANCE_PREMIUM_INVOICE",
+      "templateName": "Premium invoice",
+      "category": "INSURANCE",
+      "documentPurpose": "PREMIUM_INVOICE",
+      "documentType": "INVOICE",
+      "version": "1.0.0",
+      "factsContractCode": "PREMIUM_INVOICE",
+      "factsContractVersion": "1",
+      "template": "templates/insurance_premium_invoice.ftlh",
+      "schema": "schemas/insurance_premium_invoice.json",
+      "example": "examples/insurance_premium_invoice.json",
+      "businessPrerequisites": [
+        "Authoritative premium/tax/fee assessment and invoice identity",
+        "Actual policy/customer association",
+        "Payment allocation facts and configured permitted delivery channel"
+      ],
+      "layoutProfile": "FIREFLY_SANDBOX_PRINT_PREVIEW_V1"
+    },
+    {
+      "templateCode": "SBX_INSURANCE_CLAIM_SETTLEMENT",
+      "templateName": "Claim settlement statement",
+      "category": "INSURANCE",
+      "documentPurpose": "CLAIM_SETTLEMENT",
+      "documentType": "REPORT",
+      "version": "1.0.0",
+      "factsContractCode": "CLAIM_SETTLEMENT",
+      "factsContractVersion": "1",
+      "template": "templates/insurance_claim_settlement.ftlh",
+      "schema": "schemas/insurance_claim_settlement.json",
+      "example": "examples/insurance_claim_settlement.json",
+      "businessPrerequisites": [
+        "Authorized coverage/claim decision and settlement authority",
+        "Reconciled assessment/deductible/prior-payment facts",
+        "Actual financial status and evidence retention policy"
+      ],
+      "layoutProfile": "FIREFLY_SANDBOX_PRINT_PREVIEW_V1"
+    },
+    {
+      "templateCode": "SBX_DEPOSIT_PRODUCT_AGREEMENT",
+      "templateName": "Deposit product agreement",
+      "category": "BANKING",
+      "documentPurpose": "PRODUCT_AGREEMENT",
+      "documentType": "CONTRACT",
+      "version": "1.0.0",
+      "factsContractCode": "PRODUCT_AGREEMENT",
+      "factsContractVersion": "1",
+      "template": "templates/deposit_product_agreement.ftlh",
+      "schema": "schemas/deposit_product_agreement.json",
+      "example": "examples/deposit_product_agreement.json",
+      "businessPrerequisites": [
+        "Actual approved product, pricing, customer and contract associations and exact revisions",
+        "Current identity/consent/terms authority and separate activation/signature evidence"
+      ],
+      "layoutProfile": "FIREFLY_SANDBOX_PRINT_PREVIEW_V1"
+    },
+    {
+      "templateCode": "SBX_CUSTOMER_PROFILE",
+      "templateName": "Customer relationship profile",
+      "category": "CUSTOMER",
+      "documentPurpose": "CUSTOMER_PROFILE",
+      "documentType": "REPORT",
+      "version": "1.0.0",
+      "factsContractCode": "CUSTOMER_PROFILE",
+      "factsContractVersion": "1",
+      "template": "templates/customer_profile.ftlh",
+      "schema": "schemas/customer_profile.json",
+      "example": "examples/customer_profile.json",
+      "businessPrerequisites": [
+        "Authorized customer/review/consent snapshots with explicit purpose-specific data access",
+        "Verified product/party role mapping; no unmasked identity or screening evidence in the reusable specimen"
+      ],
+      "layoutProfile": "FIREFLY_SANDBOX_PRINT_PREVIEW_V1"
+    },
+    {
+      "templateCode": "SBX_ACCOUNT_OWNERSHIP_CERTIFICATE",
+      "templateName": "Account ownership certificate",
+      "category": "BANKING",
+      "documentPurpose": "ACCOUNT_OWNERSHIP",
+      "documentType": "REPORT",
+      "version": "1.0.0",
+      "factsContractCode": "ACCOUNT_OWNERSHIP",
+      "factsContractVersion": "1",
+      "template": "templates/account_ownership_certificate.ftlh",
+      "schema": "schemas/account_ownership_certificate.json",
+      "example": "examples/account_ownership_certificate.json",
+      "businessPrerequisites": [
+        "Actual effective account-holder association and exact customer/account versions at the requested instant",
+        "Approved certificate purpose/issuer authority and current permission; operator role is not ownership"
+      ],
+      "layoutProfile": "FIREFLY_SANDBOX_PRINT_PREVIEW_V1"
+    },
+    {
+      "templateCode": "SBX_ACCOUNT_BALANCE_CERTIFICATE",
+      "templateName": "Account balance certificate as of a date",
+      "category": "BANKING",
+      "documentPurpose": "ACCOUNT_BALANCE_AS_OF",
+      "documentType": "REPORT",
+      "version": "1.0.0",
+      "factsContractCode": "ACCOUNT_BALANCE_AS_OF",
+      "factsContractVersion": "1",
+      "template": "templates/account_balance_certificate.ftlh",
+      "schema": "schemas/account_balance_certificate.json",
+      "example": "examples/account_balance_certificate.json",
+      "businessPrerequisites": [
+        "Authorized genuine historical ledger cutoff/hold extraction and exact account ownership snapshot",
+        "Defined booked/held/cash-available roles, cutoff/time zone/source sequence and immutable correction lineage"
+      ],
+      "layoutProfile": "FIREFLY_SANDBOX_PRINT_PREVIEW_V1"
+    },
+    {
+      "templateCode": "SBX_FINANCIAL_BALANCE_SHEET",
+      "templateName": "Financial balance sheet",
+      "category": "ACCOUNTING",
+      "documentPurpose": "FINANCIAL_BALANCE_SHEET",
+      "documentType": "REPORT",
+      "version": "1.0.0",
+      "factsContractCode": "FINANCIAL_BALANCE_SHEET",
+      "factsContractVersion": "1",
+      "template": "templates/financial_balance_sheet.ftlh",
+      "schema": "schemas/financial_balance_sheet.json",
+      "example": "examples/financial_balance_sheet.json",
+      "businessPrerequisites": [
+        "Actual reconciled GL/subledger extraction, exact entity/book/currency/period and retained source versions",
+        "Approved reporting basis, line mapping, comparative treatment, close/adjustment and report authority"
+      ],
+      "layoutProfile": "FIREFLY_SANDBOX_PRINT_PREVIEW_V1"
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "documentReference": "DEMO-BANK-ACCOUNT-STATEMENT",
+  "issuedOn": "2026-10-01",
+  "partyName": "Morgan Example",
+  "resourceReference": "DEMO-001",
+  "currency": "USD",
+  "accountNumber": "•••• 4821",
+  "periodStart": "2026-09-01",
+  "periodEnd": "2026-09-30",
+  "openingBalance": "15250.00",
+  "closingBalance": "17014.27",
+  "totalDebits": "2820.73",
+  "totalCredits": "4585.00",
+  "contactReference": "DEMO-SERVICE-001; use the configured institution contact channel",
+  "rateNote": "Non-interest-bearing demonstration account",
+  "movements": [
+    {
+      "date": "2026-09-02",
+      "description": "Salary credit",
+      "debit": "0.00",
+      "credit": "4200.00",
+      "balance": "19450.00"
+    },
+    {
+      "date": "2026-09-03",
+      "description": "Rent payment",
+      "debit": "1450.00",
+      "credit": "0.00",
+      "balance": "18000.00"
+    },
+    {
+      "date": "2026-09-04",
+      "description": "Grocery purchase",
+      "debit": "86.42",
+      "credit": "0.00",
+      "balance": "17913.58"
+    },
+    {
+      "date": "2026-09-07",
+      "description": "Utility payment",
+      "debit": "125.80",
+      "credit": "0.00",
+      "balance": "17787.78"
+    },
+    {
+      "date": "2026-09-08",
+      "description": "Transfer received",
+      "debit": "0.00",
+      "credit": "350.00",
+      "balance": "18137.78"
+    },
+    {
+      "date": "2026-09-10",
+      "description": "Transit subscription",
+      "debit": "48.00",
+      "credit": "0.00",
+      "balance": "18089.78"
+    },
+    {
+      "date": "2026-09-12",
+      "description": "Insurance premium",
+      "debit": "163.33",
+      "credit": "0.00",
+      "balance": "17926.45"
+    },
+    {
+      "date": "2026-09-15",
+      "description": "Savings transfer",
+      "debit": "750.00",
+      "credit": "0.00",
+      "balance": "17176.45"
+    },
+    {
+      "date": "2026-09-18",
+      "description": "Card payment",
+      "debit": "92.18",
+      "credit": "0.00",
+      "balance": "17084.27"
+    },
+    {
+      "date": "2026-09-20",
+      "description": "Refund received",
+      "debit": "0.00",
+      "credit": "35.00",
+      "balance": "17119.27"
+    },
+    {
+      "date": "2026-09-24",
+      "description": "Loan installment",
+      "debit": "100.00",
+      "credit": "0.00",
+      "balance": "17019.27"
+    },
+    {
+      "date": "2026-09-28",
+      "description": "Service fee",
+      "debit": "5.00",
+      "credit": "0.00",
+      "balance": "17014.27"
+    }
+  ]
+}

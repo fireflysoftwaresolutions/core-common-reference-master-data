@@ -1,0 +1,56 @@
+{
+  "documentReference": "DEMO-DEPOSIT-PRODUCT-AGREEMENT",
+  "issuedOn": "2026-10-01",
+  "partyName": "Morgan Example",
+  "resourceReference": "DEMO-DEPOSIT-AGREEMENT-4821",
+  "sources": [
+    {
+      "system": "core-common-product-mgmt",
+      "resourceReference": "SBX-CURRENT-ACCOUNT",
+      "version": "1.0.0",
+      "observedAt": "2026-10-01T08:00:00Z"
+    },
+    {
+      "system": "core-common-customer-mgmt",
+      "resourceReference": "DEMO-CUSTOMER-4821",
+      "version": "7",
+      "observedAt": "2026-10-01T08:00:00Z"
+    },
+    {
+      "system": "core-common-contract-mgmt",
+      "resourceReference": "DEMO-DEPOSIT-AGREEMENT-4821",
+      "version": "3",
+      "observedAt": "2026-10-01T08:00:00Z"
+    },
+    {
+      "system": "core-common-pricing-mgmt",
+      "resourceReference": "SBX-CURRENT-PRICING",
+      "version": "1.0.0",
+      "observedAt": "2026-10-01T08:00:00Z"
+    },
+    {
+      "system": "core-common-reference-master-data",
+      "resourceReference": "SBX-DEPOSIT-TERMS",
+      "version": "1.0.0",
+      "observedAt": "2026-10-01T08:00:00Z"
+    }
+  ],
+  "partyReference": "DEMO-CUSTOMER-4821",
+  "accountReference": "DEMO-ACCOUNT-4821",
+  "accountNumber": "•••• 4821",
+  "contractReference": "DEMO-DEPOSIT-AGREEMENT-4821",
+  "productCode": "SBX_CURRENT_ACCOUNT",
+  "productVersion": "1.0.0",
+  "productName": "Sandbox Everyday Current Account",
+  "currency": "USD",
+  "effectiveDate": "2026-09-01",
+  "executionStatus": "UNSIGNED_SANDBOX",
+  "monthlyFee": "5.00",
+  "feeWaiverBalance": "1000.00",
+  "overdraftLimit": "0.00",
+  "creditInterestRate": "0.00%",
+  "termsReference": "SBX-DEPOSIT-TERMS / 1.0.0",
+  "pricingReference": "SBX-CURRENT-PRICING / 1.0.0",
+  "serviceReference": "DEMO-SERVICE-001",
+  "complaintsReference": "DEMO-COMPLAINTS-001"
+}

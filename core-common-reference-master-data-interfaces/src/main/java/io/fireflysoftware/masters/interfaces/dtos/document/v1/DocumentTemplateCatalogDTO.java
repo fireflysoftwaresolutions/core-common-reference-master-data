@@ -72,6 +72,15 @@ public class DocumentTemplateCatalogDTO {
 
     private Map<String, Object> templateVariables;
 
+    private Map<String, Object> inputSchema;
+
+    @Size(max = 65536)
+    private String inputSchemaJson;
+
+    private String styleContent;
+
+    private String mediaType;
+
     @Size(max = 20, message = "Version must not exceed 20 characters")
     private String version;
 

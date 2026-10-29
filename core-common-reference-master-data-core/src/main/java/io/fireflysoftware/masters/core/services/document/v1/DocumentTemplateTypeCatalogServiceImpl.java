@@ -45,64 +45,79 @@ public class DocumentTemplateTypeCatalogServiceImpl implements DocumentTemplateT
     @Autowired
     private DocumentTemplateTypeCatalogMapper mapper;
 
+    @Autowired
+    private DocumentTemplateAccessGuard access;
+
     @Override
     public Mono<PaginationResponse<DocumentTemplateTypeCatalogDTO>> listDocumentTemplateTypes(PaginationRequest paginationRequest) {
-        return PaginationUtils.paginateQuery(
-                paginationRequest,
-                mapper::toDTO,
-                pageable -> repository.findAllBy(pageable),
-                () -> repository.count()
-        );
+        return access.mono("read", "document-template-type", () -> {
+            return PaginationUtils.paginateQuery(
+                    paginationRequest,
+                    mapper::toDTO,
+                    pageable -> repository.findAllBy(pageable),
+                    () -> repository.count()
+            );
+        });
     }
 
     @Override
     public Mono<DocumentTemplateTypeCatalogDTO> createDocumentTemplateType(DocumentTemplateTypeCatalogDTO documentTemplateTypeDTO) {
-        // Set audit fields
-        LocalDateTime now = LocalDateTime.now();
-        documentTemplateTypeDTO.setDateCreated(now);
-        documentTemplateTypeDTO.setDateUpdated(now);
+        return access.mono("draft.write", "document-template-type", () -> {
+            // Set audit fields
+            LocalDateTime now = LocalDateTime.now();
+            documentTemplateTypeDTO.setDateCreated(now);
+            documentTemplateTypeDTO.setDateUpdated(now);
 
-        return Mono.just(documentTemplateTypeDTO)
-                .map(mapper::toEntity)
-                .flatMap(repository::save)
-                .map(mapper::toDTO)
-                .onErrorResume(e -> Mono.error(new RuntimeException("Error creating document template type: " + e.getMessage(), e)));
+            return Mono.just(documentTemplateTypeDTO)
+                    .map(mapper::toEntity)
+                    .flatMap(repository::save)
+                    .map(mapper::toDTO)
+                    .onErrorResume(e -> Mono.error(new RuntimeException("Error creating document template type: " + e.getMessage(), e)));
+        });
     }
 
     @Override
     public Mono<DocumentTemplateTypeCatalogDTO> getDocumentTemplateType(UUID typeId) {
-        return repository.findById(typeId)
-                .map(mapper::toDTO)
-                .switchIfEmpty(Mono.error(new RuntimeException("Document template type not found with ID: " + typeId)));
+        return access.mono("read", "document-template-type", () -> {
+            return repository.findById(typeId)
+                    .map(mapper::toDTO)
+                    .switchIfEmpty(Mono.error(new RuntimeException("Document template type not found with ID: " + typeId)));
+        });
     }
 
     @Override
     public Mono<DocumentTemplateTypeCatalogDTO> getDocumentTemplateTypeByCode(String typeCode) {
-        return repository.findByTypeCode(typeCode)
-                .map(mapper::toDTO)
-                .switchIfEmpty(Mono.error(new RuntimeException("Document template type not found with code: " + typeCode)));
+        return access.mono("read", "document-template-type", () -> {
+            return repository.findByTypeCode(typeCode)
+                    .map(mapper::toDTO)
+                    .switchIfEmpty(Mono.error(new RuntimeException("Document template type not found with code: " + typeCode)));
+        });
     }
 
     @Override
     public Mono<DocumentTemplateTypeCatalogDTO> updateDocumentTemplateType(UUID typeId, DocumentTemplateTypeCatalogDTO documentTemplateTypeDTO) {
-        return repository.findById(typeId)
-                .switchIfEmpty(Mono.error(new RuntimeException("Document template type not found with ID: " + typeId)))
-                .flatMap(existingEntity -> {
-                    DocumentTemplateTypeCatalog updatedEntity = mapper.toEntity(documentTemplateTypeDTO);
-                    updatedEntity.setTypeId(typeId);
-                    updatedEntity.setDateCreated(existingEntity.getDateCreated());
-                    updatedEntity.setDateUpdated(LocalDateTime.now());
-                    return repository.save(updatedEntity);
-                })
-                .map(mapper::toDTO)
-                .onErrorResume(e -> Mono.error(new RuntimeException("Error updating document template type: " + e.getMessage(), e)));
+        return access.mono("draft.write", "document-template-type", () -> {
+            return repository.findById(typeId)
+                    .switchIfEmpty(Mono.error(new RuntimeException("Document template type not found with ID: " + typeId)))
+                    .flatMap(existingEntity -> {
+                        DocumentTemplateTypeCatalog updatedEntity = mapper.toEntity(documentTemplateTypeDTO);
+                        updatedEntity.setTypeId(typeId);
+                        updatedEntity.setDateCreated(existingEntity.getDateCreated());
+                        updatedEntity.setDateUpdated(LocalDateTime.now());
+                        return repository.save(updatedEntity);
+                    })
+                    .map(mapper::toDTO)
+                    .onErrorResume(e -> Mono.error(new RuntimeException("Error updating document template type: " + e.getMessage(), e)));
+        });
     }
 
     @Override
     public Mono<Void> deleteDocumentTemplateType(UUID typeId) {
-        return repository.findById(typeId)
-                .switchIfEmpty(Mono.error(new RuntimeException("Document template type not found with ID: " + typeId)))
-                .flatMap(repository::delete)
-                .onErrorResume(e -> Mono.error(new RuntimeException("Error deleting document template type: " + e.getMessage(), e)));
+        return access.mono("draft.write", "document-template-type", () -> {
+            return repository.findById(typeId)
+                    .switchIfEmpty(Mono.error(new RuntimeException("Document template type not found with ID: " + typeId)))
+                    .flatMap(repository::delete)
+                    .onErrorResume(e -> Mono.error(new RuntimeException("Error deleting document template type: " + e.getMessage(), e)));
+        });
     }
 }

@@ -1,0 +1,66 @@
+{
+  "documentReference": "DEMO-FINANCIAL-BALANCE-SHEET",
+  "issuedOn": "2026-10-01",
+  "partyName": "Firefly Sandbox Financial Services",
+  "resourceReference": "DEMO-REPORTING-ENTITY-01",
+  "sources": [
+    {
+      "system": "core-common-accounting-gl",
+      "resourceReference": "DEMO-GL-CLOSE-2026-09",
+      "version": "44",
+      "observedAt": "2026-10-01T08:00:00Z"
+    },
+    {
+      "system": "domain-common-accounting",
+      "resourceReference": "DEMO-RECONCILIATION-2026-09",
+      "version": "8",
+      "observedAt": "2026-10-01T08:00:00Z"
+    },
+    {
+      "system": "core-common-accounting-gl",
+      "resourceReference": "DEMO-GL-CLOSE-2025-09",
+      "version": "31",
+      "observedAt": "2026-10-01T08:00:00Z"
+    },
+    {
+      "system": "domain-common-accounting",
+      "resourceReference": "DEMO-RECONCILIATION-2025-09",
+      "version": "5",
+      "observedAt": "2026-10-01T08:00:00Z"
+    }
+  ],
+  "currency": "USD",
+  "reportingDate": "2026-09-30",
+  "comparativeDate": "2025-09-30",
+  "reportingBasis": "SANDBOX_MANAGEMENT_BASIS",
+  "consolidationScope": "SINGLE_FICTIONAL_ENTITY",
+  "approvalStatus": "UNAUDITED_SANDBOX",
+  "periodReference": "DEMO-CLOSE-2026-09",
+  "reconciliationReference": "DEMO-RECONCILIATION-2026-09",
+  "current": {
+    "cash": "250000.00",
+    "customerLoans": "600000.00",
+    "investments": "150000.00",
+    "totalAssets": "1000000.00",
+    "customerDeposits": "700000.00",
+    "borrowings": "100000.00",
+    "totalLiabilities": "800000.00",
+    "shareCapital": "150000.00",
+    "retainedEarnings": "50000.00",
+    "totalEquity": "200000.00",
+    "totalLiabilitiesAndEquity": "1000000.00"
+  },
+  "comparative": {
+    "cash": "200000.00",
+    "customerLoans": "550000.00",
+    "investments": "150000.00",
+    "totalAssets": "900000.00",
+    "customerDeposits": "630000.00",
+    "borrowings": "100000.00",
+    "totalLiabilities": "730000.00",
+    "shareCapital": "150000.00",
+    "retainedEarnings": "20000.00",
+    "totalEquity": "170000.00",
+    "totalLiabilitiesAndEquity": "900000.00"
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "documentReference": "DEMO-LOAN-AGREEMENT",
+  "issuedOn": "2026-10-01",
+  "partyName": "Morgan Example",
+  "resourceReference": "DEMO-001",
+  "currency": "USD",
+  "agreementNumber": "DEMO-LOAN-2048",
+  "principal": "12000.00",
+  "annualRate": "12.00%",
+  "aprDisplay": "12.00%",
+  "financeCharge": "794.23",
+  "totalPayments": "12794.23",
+  "installment": "1066.19",
+  "term": "12 monthly installments",
+  "effectiveDate": "2026-10-01",
+  "firstDueDate": "2026-11-01",
+  "finalDueDate": "2027-10-01",
+  "lateFee": "0.00",
+  "governingTerms": "Demonstration fixed-rate installment loan; no origination or late fees",
+  "repaymentReference": "•••• 4821",
+  "signatureState": "Not signed — signature provider integration required",
+  "schedule": [
+    {
+      "number": "1",
+      "dueDate": "2026-11-01",
+      "openingPrincipal": "12000.00",
+      "principal": "946.19",
+      "interest": "120.00",
+      "payment": "1066.19",
+      "closingPrincipal": "11053.81"
+    },
+    {
+      "number": "2",
+      "dueDate": "2026-12-01",
+      "openingPrincipal": "11053.81",
+      "principal": "955.65",
+      "interest": "110.54",
+      "payment": "1066.19",
+      "closingPrincipal": "10098.16"
+    },
+    {
+      "number": "3",
+      "dueDate": "2027-01-01",
+      "openingPrincipal": "10098.16",
+      "principal": "965.21",
+      "interest": "100.98",
+      "payment": "1066.19",
+      "closingPrincipal": "9132.95"
+    },
+    {
+      "number": "4",
+      "dueDate": "2027-02-01",
+      "openingPrincipal": "9132.95",
+      "principal": "974.86",
+      "interest": "91.33",
+      "payment": "1066.19",
+      "closingPrincipal": "8158.09"
+    },
+    {
+      "number": "5",
+      "dueDate": "2027-03-01",
+      "openingPrincipal": "8158.09",
+      "principal": "984.61",
+      "interest": "81.58",
+      "payment": "1066.19",
+      "closingPrincipal": "7173.48"
+    },
+    {
+      "number": "6",
+      "dueDate": "2027-04-01",
+      "openingPrincipal": "7173.48",
+      "principal": "994.46",
+      "interest": "71.73",
+      "payment": "1066.19",
+      "closingPrincipal": "6179.02"
+    },
+    {
+      "number": "7",
+      "dueDate": "2027-05-01",
+      "openingPrincipal": "6179.02",
+      "principal": "1004.40",
+      "interest": "61.79",
+      "payment": "1066.19",
+      "closingPrincipal": "5174.62"
+    },
+    {
+      "number": "8",
+      "dueDate": "2027-06-01",
+      "openingPrincipal": "5174.62",
+      "principal": "1014.44",
+      "interest": "51.75",
+      "payment": "1066.19",
+      "closingPrincipal": "4160.18"
+    },
+    {
+      "number": "9",
+      "dueDate": "2027-07-01",
+      "openingPrincipal": "4160.18",
+      "principal": "1024.59",
+      "interest": "41.60",
+      "payment": "1066.19",
+      "closingPrincipal": "3135.59"
+    },
+    {
+      "number": "10",
+      "dueDate": "2027-08-01",
+      "openingPrincipal": "3135.59",
+      "principal": "1034.83",
+      "interest": "31.36",
+      "payment": "1066.19",
+      "closingPrincipal": "2100.76"
+    },
+    {
+      "number": "11",
+      "dueDate": "2027-09-01",
+      "openingPrincipal": "2100.76",
+      "principal": "1045.18",
+      "interest": "21.01",
+      "payment": "1066.19",
+      "closingPrincipal": "1055.58"
+    },
+    {
+      "number": "12",
+      "dueDate": "2027-10-01",
+      "openingPrincipal": "1055.58",
+      "principal": "1055.58",
+      "interest": "10.56",
+      "payment": "1066.14",
+      "closingPrincipal": "0.00"
+    }
+  ],
+  "interestBasis": "30/360 monthly periods; monthly interest rounded half up to USD cents; final installment adjusted to clear principal"
+}

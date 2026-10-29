@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Customer relationship profile sandbox facts",
+  "type": "object",
+  "properties": {
+    "documentReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "issuedOn": {
+      "type": "string",
+      "format": "date"
+    },
+    "partyName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "resourceReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "system": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "resourceReference": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "system",
+          "resourceReference",
+          "version",
+          "observedAt"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 6
+    },
+    "partyReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "customerType": {
+      "const": "INDIVIDUAL"
+    },
+    "relationshipSince": {
+      "type": "string",
+      "format": "date"
+    },
+    "asOf": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "purpose": {
+      "const": "INTERNAL_CUSTOMER_SERVICE"
+    },
+    "residencyCountry": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$"
+    },
+    "preferredLanguage": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50
+    },
+    "maskedContact": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "reviewReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "reviewStatus": {
+      "const": "REVIEW_RECORDED"
+    },
+    "lastReviewDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "reviewDueDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "relationships": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "productName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "reference": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "role": {
+            "enum": [
+              "HOLDER",
+              "REPRESENTATIVE"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          }
+        },
+        "required": [
+          "productName",
+          "reference",
+          "role",
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 4
+    },
+    "consentReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "serviceReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    }
+  },
+  "required": [
+    "documentReference",
+    "issuedOn",
+    "partyName",
+    "resourceReference",
+    "sources",
+    "partyReference",
+    "customerType",
+    "relationshipSince",
+    "asOf",
+    "purpose",
+    "residencyCountry",
+    "preferredLanguage",
+    "maskedContact",
+    "reviewReference",
+    "reviewStatus",
+    "lastReviewDate",
+    "reviewDueDate",
+    "relationships",
+    "consentReference",
+    "serviceReference"
+  ],
+  "additionalProperties": false
+}

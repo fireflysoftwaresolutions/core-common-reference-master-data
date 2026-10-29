@@ -1,0 +1,25 @@
+{
+  "scope": "SANDBOX_PREVIEW_ONLY",
+  "assets": {
+    "firefly-primary.svg": {
+      "source": "openplatform-docs/theme/assets/brand/firefly-logo-primary-colour.svg",
+      "sha256": "71d3e305ebb342ba933945220bc14d0ff598feed7debd7796fd867afc150cddc"
+    },
+    "firefly-compact.svg": {
+      "source": "openplatform-docs/docs/assets/brand/firefly-logo-compact-colour.svg",
+      "sha256": "3f81297c1ab8b2c31c431f5a25484b8d5648bb6161a91e5dd2799be57e8ac8d6"
+    },
+    "manrope-latin.woff2": {
+      "source": "brand-kit/templates/mkdocs/assets/fonts/manrope/manrope-latin-wght-normal.woff2",
+      "sha256": "a30ddcd349703aff7464c34bef3fffdff405ee50c113440d7c8693c02d210972"
+    },
+    "manrope-latin-ext.woff2": {
+      "source": "brand-kit/templates/mkdocs/assets/fonts/manrope/manrope-latin-ext-wght-normal.woff2",
+      "sha256": "3911b66d9f2e005a4b989223405d0e5032619c668597ba467cc76a23c8fffcfb"
+    },
+    "OFL.txt": {
+      "source": "brand-kit/templates/mkdocs/assets/fonts/manrope/OFL.txt",
+      "sha256": "d826ab6583b12c26807d8716a545bdbbb672df04f48608a364ba9efdbe501c30"
+    }
+  }
+}

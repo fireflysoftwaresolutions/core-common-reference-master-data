@@ -43,74 +43,93 @@ public class DocumentTemplateLocalizationServiceImpl implements DocumentTemplate
     @Autowired
     private DocumentTemplateLocalizationMapper mapper;
 
+    @Autowired
+    private DocumentTemplateAccessGuard access;
+
     @Override
     public Flux<DocumentTemplateLocalizationDTO> getLocalizationsByTemplateId(UUID templateId) {
-        return repository.findByTemplateId(templateId)
-                .map(mapper::toDTO)
-                .switchIfEmpty(Flux.error(new RuntimeException("No localizations found for template ID: " + templateId)));
+        return access.flux("read", "document-template-localization", () -> {
+            return repository.findByTemplateId(templateId)
+                    .map(mapper::toDTO)
+                    .switchIfEmpty(Flux.error(new RuntimeException("No localizations found for template ID: " + templateId)));
+        });
     }
 
     @Override
     public Flux<DocumentTemplateLocalizationDTO> getLocalizationsByLocaleId(UUID localeId) {
-        return repository.findByLocaleId(localeId)
-                .map(mapper::toDTO)
-                .switchIfEmpty(Flux.error(new RuntimeException("No localizations found for locale ID: " + localeId)));
+        return access.flux("read", "document-template-localization", () -> {
+            return repository.findByLocaleId(localeId)
+                    .map(mapper::toDTO)
+                    .switchIfEmpty(Flux.error(new RuntimeException("No localizations found for locale ID: " + localeId)));
+        });
     }
 
     @Override
     public Mono<DocumentTemplateLocalizationDTO> createDocumentTemplateLocalization(DocumentTemplateLocalizationDTO localizationDTO) {
-        // Set audit fields
-        LocalDateTime now = LocalDateTime.now();
-        localizationDTO.setDateCreated(now);
-        localizationDTO.setDateUpdated(now);
+        return access.mono("draft.write", "document-template-localization", () -> {
+            // Set audit fields
+            LocalDateTime now = LocalDateTime.now();
+            localizationDTO.setDateCreated(now);
+            localizationDTO.setDateUpdated(now);
 
-        return Mono.just(localizationDTO)
-                .map(mapper::toEntity)
-                .flatMap(repository::save)
-                .map(mapper::toDTO)
-                .onErrorResume(e -> Mono.error(new RuntimeException("Error creating document template localization: " + e.getMessage(), e)));
+            return Mono.just(localizationDTO)
+                    .map(mapper::toEntity)
+                    .flatMap(repository::save)
+                    .map(mapper::toDTO)
+                    .onErrorResume(e -> Mono.error(new RuntimeException("Error creating document template localization: " + e.getMessage(), e)));
+        });
     }
 
     @Override
     public Mono<DocumentTemplateLocalizationDTO> getDocumentTemplateLocalization(UUID localizationId) {
-        return repository.findById(localizationId)
-                .map(mapper::toDTO)
-                .switchIfEmpty(Mono.error(new RuntimeException("Document template localization not found with ID: " + localizationId)));
+        return access.mono("read", "document-template-localization", () -> {
+            return repository.findById(localizationId)
+                    .map(mapper::toDTO)
+                    .switchIfEmpty(Mono.error(new RuntimeException("Document template localization not found with ID: " + localizationId)));
+        });
     }
 
     @Override
     public Mono<DocumentTemplateLocalizationDTO> getDocumentTemplateLocalizationByTemplateAndLocale(UUID templateId, UUID localeId) {
-        return repository.findByTemplateIdAndLocaleId(templateId, localeId)
-                .map(mapper::toDTO)
-                .switchIfEmpty(Mono.error(new RuntimeException("Document template localization not found with template ID: " + templateId + " and locale ID: " + localeId)));
+        return access.mono("read", "document-template-localization", () -> {
+            return repository.findByTemplateIdAndLocaleId(templateId, localeId)
+                    .map(mapper::toDTO)
+                    .switchIfEmpty(Mono.error(new RuntimeException("Document template localization not found with template ID: " + templateId + " and locale ID: " + localeId)));
+        });
     }
 
     @Override
     public Mono<DocumentTemplateLocalizationDTO> updateDocumentTemplateLocalization(UUID localizationId, DocumentTemplateLocalizationDTO localizationDTO) {
-        return repository.findById(localizationId)
-                .switchIfEmpty(Mono.error(new RuntimeException("Document template localization not found with ID: " + localizationId)))
-                .flatMap(existingEntity -> {
-                    DocumentTemplateLocalization updatedEntity = mapper.toEntity(localizationDTO);
-                    updatedEntity.setLocalizationId(localizationId);
-                    updatedEntity.setDateCreated(existingEntity.getDateCreated());
-                    updatedEntity.setDateUpdated(LocalDateTime.now());
-                    return repository.save(updatedEntity);
-                })
-                .map(mapper::toDTO)
-                .onErrorResume(e -> Mono.error(new RuntimeException("Error updating document template localization: " + e.getMessage(), e)));
+        return access.mono("draft.write", "document-template-localization", () -> {
+            return repository.findById(localizationId)
+                    .switchIfEmpty(Mono.error(new RuntimeException("Document template localization not found with ID: " + localizationId)))
+                    .flatMap(existingEntity -> {
+                        DocumentTemplateLocalization updatedEntity = mapper.toEntity(localizationDTO);
+                        updatedEntity.setLocalizationId(localizationId);
+                        updatedEntity.setDateCreated(existingEntity.getDateCreated());
+                        updatedEntity.setDateUpdated(LocalDateTime.now());
+                        return repository.save(updatedEntity);
+                    })
+                    .map(mapper::toDTO)
+                    .onErrorResume(e -> Mono.error(new RuntimeException("Error updating document template localization: " + e.getMessage(), e)));
+        });
     }
 
     @Override
     public Mono<Void> deleteDocumentTemplateLocalization(UUID localizationId) {
-        return repository.findById(localizationId)
-                .switchIfEmpty(Mono.error(new RuntimeException("Document template localization not found with ID: " + localizationId)))
-                .flatMap(repository::delete)
-                .onErrorResume(e -> Mono.error(new RuntimeException("Error deleting document template localization: " + e.getMessage(), e)));
+        return access.mono("draft.write", "document-template-localization", () -> {
+            return repository.findById(localizationId)
+                    .switchIfEmpty(Mono.error(new RuntimeException("Document template localization not found with ID: " + localizationId)))
+                    .flatMap(repository::delete)
+                    .onErrorResume(e -> Mono.error(new RuntimeException("Error deleting document template localization: " + e.getMessage(), e)));
+        });
     }
 
     @Override
     public Mono<Void> deleteLocalizationsByTemplateId(UUID templateId) {
-        return repository.deleteByTemplateId(templateId)
-                .onErrorResume(e -> Mono.error(new RuntimeException("Error deleting localizations for template ID: " + templateId, e)));
+        return access.mono("draft.write", "document-template-localization", () -> {
+            return repository.deleteByTemplateId(templateId)
+                    .onErrorResume(e -> Mono.error(new RuntimeException("Error deleting localizations for template ID: " + templateId, e)));
+        });
     }
 }

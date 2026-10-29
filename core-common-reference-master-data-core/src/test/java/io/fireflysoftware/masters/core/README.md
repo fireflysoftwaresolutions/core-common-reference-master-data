@@ -1,194 +1,266 @@
-# Master Data Service Test Suite
+# Reference-data record services: test guide
 
-This directory contains the test suite for the Common Platform Reference Master Data Service. The tests are organized to validate the functionality of service implementations, ensuring that all CRUD operations and business logic work correctly.
+[Repository guide](../../../../../../../../README.md) · [Module build](../../../../../../../pom.xml)
 
-## Test Structure
+## Purpose and boundary
 
-The test suite follows the same package structure as the main application code, with test classes located in corresponding packages:
+This guide maps the authored tests beneath this directory to their source files and gives reproducible commands for reviewing their actual assertions. The test inventory below is a source inventory, not a measured coverage percentage or a record of a successful run.
 
-```
-io.fireflysoftware.masters.core.services
-├── activity.v1
-│   └── ActivityCodeServiceImplTest.java
-├── bank.v1
-│   └── BankInstitutionCodeServiceImplTest.java
-├── branch.v1
-│   └── BranchServiceImplTest.java
-├── consent.v1
-│   └── ConsentCatalogServiceImplTest.java
-├── country.v1
-│   └── CountryServiceImplTest.java
-├── currency.v1
-│   └── CurrencyServiceImplTest.java
-├── division.v1
-│   └── AdministrativeDivisionServiceImplTest.java
-├── holiday.v1
-│   └── HolidayServiceImplTest.java
-├── legal.v1
-│   └── LegalFormServiceImplTest.java
-├── locale.v1
-│   └── LanguageLocaleServiceImplTest.java
-├── lookup.v1
-│   ├── LookupDomainServiceImplTest.java
-│   └── LookupItemServiceImplTest.java
-├── relationships.v1
-│   └── RelationshipTypeMasterServiceImplTest.java
-└── title.v1
-    └── TitleMasterServiceImplTest.java
+Mocked country, bank, currency, consent-catalog, and other reference records do not establish regulatory consent, a live bank connection, holiday-calendar completeness, or production data quality. Catalog content and effective dates require their own governed acceptance.
+
+## Prerequisites and fixture ownership
+
+Run commands from the repository root with JDK 25 selected in both `java --version` and `mvn --version`. Resolve the matching parent/framework and reactor dependencies through your authorized Maven configuration. The listed fixture source controls the synthetic IDs, DTOs, mocked dependencies, and expected outcomes; it is not a seed script for a running bank. Read setup and teardown before extending a fixture or executing another module's integration tests.
+
+## Run and inspect
+
+Run one existing class together with its reactor dependencies:
+
+```sh
+mvn -B -pl core-common-reference-master-data-core -am test -DskipOpenApiGen \
+  -Dtest=IdentityDocumentLocalizationRepositoryTest -Dsurefire.failIfNoSpecifiedTests=false
 ```
 
-## Testing Approach
+To run that module's configured test lifecycle after inspecting all of its fixtures:
 
-### Unit Testing
-
-The test suite uses JUnit 5 with Mockito for unit testing. Each service implementation is tested in isolation, with dependencies mocked to ensure true unit testing. The reactive nature of the application is tested using Project Reactor's `StepVerifier`.
-
-### Test Coverage
-
-Each service implementation test covers:
-
-1. **List Operations**: Testing pagination functionality for listing entities
-2. **Create Operations**: Testing the creation of new entities
-3. **Read Operations**: Testing retrieving entities by ID, including both found and not found scenarios
-4. **Update Operations**: Testing updating existing entities, including both found and not found scenarios
-5. **Delete Operations**: Testing deleting entities, including both found and not found scenarios
-6. **Special Operations**: Testing any service-specific operations (e.g., finding by country ID)
-
-## Test Utilities
-
-### TestPaginationRequest
-
-The `TestPaginationRequest` class in the `io.fireflysoftware.masters.core.utils` package extends the application's `PaginationRequest` class to provide testing-specific functionality:
-
-```java
-public class TestPaginationRequest extends PaginationRequest {
-    private int page;
-    private int size;
-    
-    public TestPaginationRequest(int page, int size) {
-        this.page = page;
-        this.size = size;
-    }
-    
-    // Getters, setters, and utility methods
-    
-    public Pageable toPageable() {
-        return PageRequest.of(page, size);
-    }
-}
+```sh
+mvn -B -pl core-common-reference-master-data-core -am test -DskipOpenApiGen
 ```
 
-This utility class simplifies testing of paginated queries by providing a convenient way to create pagination requests with specific page and size values.
+`skipOpenApiGen` prevents the parent's fixed-port API-generation startup; it does not skip tests or isolate external resources. `failIfNoSpecifiedTests=false` permits dependency modules without the selected class. Confirm that the selected class appears in `core-common-reference-master-data-core/target/surefire-reports/` and inspect tests, failures, errors, and skips in the XML. A missing report or skipped case is not a passing qualification. These commands were source-checked for this guide; no new product-test pass is claimed here.
 
-## Running Tests
+## Source inventory
 
-### Running All Tests
+Each entry lists the existing test method names. Names identify intent; read the linked body to see whether a collaborator, static utility, or the method itself is stubbed.
 
-To run all tests in the test suite, use the following Maven command:
+### [IdentityDocumentLocalizationRepositoryTest](repositories/identitydocument/v1/IdentityDocumentLocalizationRepositoryTest.java)
 
-```bash
-mvn test -pl core-common-reference-master-data-core
-```
+- `findByDocumentId_ShouldReturnLocalizations`
+- `countByDocumentId_ShouldReturnCount`
+- `findByDocumentIdAndLocaleId_ShouldReturnLocalization_WhenFound`
+- `findByDocumentIdAndLocaleId_ShouldReturnEmpty_WhenNotFound`
+- `deleteByDocumentId_ShouldDeleteLocalizations`
 
-### Running Specific Tests
+### [ActivityCodeServiceImplTest](services/activity/v1/ActivityCodeServiceImplTest.java)
 
-To run a specific test class, use:
+- `listActivityCodes_ShouldReturnPaginatedResponse`
+- `getActivityCodesByCountry_ShouldReturnActivityCodes`
+- `getChildActivityCodes_ShouldReturnChildActivityCodes`
+- `createActivityCode_ShouldReturnCreatedActivityCode`
+- `getActivityCode_ShouldReturnActivityCodeWhenFound`
+- `getActivityCode_ShouldReturnEmptyWhenNotFound`
+- `updateActivityCode_ShouldReturnUpdatedActivityCodeWhenFound`
+- `updateActivityCode_ShouldReturnEmptyWhenNotFound`
+- `deleteActivityCode_ShouldDeleteWhenFound`
 
-```bash
-mvn test -pl core-common-reference-master-data-core -Dtest=CountryServiceImplTest
-```
+### [BankInstitutionCodeServiceImplTest](services/bank/v1/BankInstitutionCodeServiceImplTest.java)
 
-To run a specific test method, use:
+- `listBankInstitutionCodes_ShouldReturnPaginatedResponse`
+- `createBankInstitutionCode_ShouldReturnCreatedEntity`
+- `getBankInstitutionCode_ShouldReturnEntityWhenFound`
+- `getBankInstitutionCode_ShouldReturnEmptyWhenNotFound`
+- `updateBankInstitutionCode_ShouldReturnUpdatedEntityWhenFound`
+- `updateBankInstitutionCode_ShouldReturnEmptyWhenNotFound`
+- `deleteBankInstitutionCode_ShouldDeleteWhenFound`
+- `deleteBankInstitutionCode_ShouldReturnEmptyWhenNotFound`
 
-```bash
-mvn test -pl core-common-reference-master-data-core -Dtest=CountryServiceImplTest#createCountry_ShouldReturnCreatedCountry
-```
+### [ConsentCatalogServiceImplTest](services/consent/v1/ConsentCatalogServiceImplTest.java)
 
-## Test Patterns
+- `listConsentCatalog_ShouldReturnPaginatedResponse`
+- `listConsentCatalogByType_ShouldReturnPaginatedResponse`
+- `createConsentCatalog_ShouldReturnCreatedConsentCatalog`
+- `getConsentCatalog_ShouldReturnConsentCatalogWhenFound`
+- `getConsentCatalog_ShouldReturnEmptyWhenNotFound`
+- `updateConsentCatalog_ShouldReturnUpdatedConsentCatalogWhenFound`
+- `updateConsentCatalog_ShouldReturnEmptyWhenNotFound`
+- `deleteConsentCatalog_ShouldDeleteWhenFound`
 
-### Setup Pattern
+### [CountryServiceImplTest](services/country/v1/CountryServiceImplTest.java)
 
-Each test class follows a consistent setup pattern:
+- `createCountry_ShouldReturnCreatedCountry`
+- `getCountry_ShouldReturnCountryWhenFound`
+- `getCountry_ShouldReturnEmptyWhenNotFound`
+- `updateCountry_ShouldReturnUpdatedCountryWhenFound`
+- `updateCountry_ShouldReturnEmptyWhenNotFound`
+- `deleteCountry_ShouldDeleteWhenFound`
+- `deleteCountry_ShouldReturnEmptyWhenNotFound`
 
-```java
-@ExtendWith(MockitoExtension.class)
-public class ServiceImplTest {
+### [CurrencyServiceImplTest](services/currency/v1/CurrencyServiceImplTest.java)
 
-    @Mock
-    private Repository repository;
+- `createCurrency_ShouldReturnCreatedCurrency`
+- `getCurrency_ShouldReturnCurrencyWhenFound`
+- `getCurrency_ShouldReturnEmptyWhenNotFound`
+- `updateCurrency_ShouldReturnUpdatedCurrencyWhenFound`
+- `updateCurrency_ShouldReturnEmptyWhenNotFound`
+- `deleteCurrency_ShouldDeleteWhenFound`
+- `deleteCurrency_ShouldReturnEmptyWhenNotFound`
 
-    @Mock
-    private Mapper mapper;
+### [AdministrativeDivisionServiceImplTest](services/division/v1/AdministrativeDivisionServiceImplTest.java)
 
-    @InjectMocks
-    private ServiceImpl service;
+- `listDivisions_ShouldReturnPaginatedResponse`
+- `createDivision_ShouldReturnCreatedDivision`
+- `getDivision_ShouldReturnDivisionWhenFound`
+- `getDivision_ShouldReturnEmptyWhenNotFound`
+- `updateDivision_ShouldReturnUpdatedDivisionWhenFound`
+- `updateDivision_ShouldReturnEmptyWhenNotFound`
+- `deleteDivision_ShouldDeleteWhenFound`
+- `deleteDivision_ShouldReturnEmptyWhenNotFound`
 
-    private Entity entity;
-    private DTO dto;
-    private TestPaginationRequest paginationRequest;
+### [IdentityDocumentCatalogServiceImplTest](services/identitydocument/v1/IdentityDocumentCatalogServiceImplTest.java)
 
-    @BeforeEach
-    void setUp() {
-        // Initialize test data
-    }
-    
-    // Test methods
-}
-```
+- `listIdentityDocuments_ShouldReturnPaginatedResponse`
+- `listIdentityDocumentsByCategory_ShouldReturnPaginatedResponse`
+- `listIdentityDocumentsByCountry_ShouldReturnPaginatedResponse`
+- `createIdentityDocument_ShouldReturnCreatedDocument`
+- `getIdentityDocument_ShouldReturnDocument_WhenFound`
+- `getIdentityDocument_ShouldReturnError_WhenNotFound`
+- `getIdentityDocumentByCode_ShouldReturnDocument_WhenFound`
+- `getIdentityDocumentByCode_ShouldReturnError_WhenNotFound`
+- `updateIdentityDocument_ShouldReturnUpdatedDocument_WhenFound`
+- `updateIdentityDocument_ShouldReturnError_WhenNotFound`
+- `deleteIdentityDocument_ShouldDeleteDocument_WhenFound`
+- `deleteIdentityDocument_ShouldReturnError_WhenNotFound`
 
-### Test Method Pattern
+### [IdentityDocumentCategoryCatalogServiceImplTest](services/identitydocument/v1/IdentityDocumentCategoryCatalogServiceImplTest.java)
 
-Each test method follows the Arrange-Act-Assert pattern:
+- `listIdentityDocumentCategories_ShouldReturnPaginatedResponse`
+- `createIdentityDocumentCategory_ShouldReturnCreatedCategory`
+- `getIdentityDocumentCategory_ShouldReturnCategory_WhenFound`
+- `getIdentityDocumentCategory_ShouldReturnError_WhenNotFound`
+- `getIdentityDocumentCategoryByCode_ShouldReturnCategory_WhenFound`
+- `getIdentityDocumentCategoryByCode_ShouldReturnError_WhenNotFound`
+- `updateIdentityDocumentCategory_ShouldReturnUpdatedCategory_WhenFound`
+- `updateIdentityDocumentCategory_ShouldReturnError_WhenNotFound`
+- `deleteIdentityDocumentCategory_ShouldDeleteCategory_WhenFound`
+- `deleteIdentityDocumentCategory_ShouldReturnError_WhenNotFound`
+
+### [IdentityDocumentLocalizationServiceImplTest](services/identitydocument/v1/IdentityDocumentLocalizationServiceImplTest.java)
+
+- `listIdentityDocumentLocalizations_ShouldReturnPaginatedResponse`
+- `getLocalizationsByDocumentId_ShouldReturnPaginatedResponse`
+- `createIdentityDocumentLocalization_ShouldReturnCreatedLocalization`
+- `getIdentityDocumentLocalizationByDocumentAndLocale_ShouldReturnLocalization_WhenFound`
+- `getIdentityDocumentLocalizationByDocumentAndLocale_ShouldReturnError_WhenNotFound`
+- `updateIdentityDocumentLocalization_ShouldReturnUpdatedLocalization_WhenFound`
+- `updateIdentityDocumentLocalization_ShouldReturnError_WhenNotFound`
+- `deleteIdentityDocumentLocalization_ShouldDeleteLocalization_WhenFound`
+- `deleteIdentityDocumentLocalization_ShouldReturnError_WhenNotFound`
+- `deleteLocalizationsByDocumentId_ShouldDeleteLocalizations`
+
+### [LegalFormServiceImplTest](services/legal/v1/LegalFormServiceImplTest.java)
+
+- `getLegalFormsByCountry_ShouldReturnLegalForms`
+- `createLegalForm_ShouldReturnCreatedLegalForm`
+- `getLegalForm_ShouldReturnLegalFormWhenFound`
+- `getLegalForm_ShouldReturnEmptyWhenNotFound`
+- `updateLegalForm_ShouldReturnUpdatedLegalFormWhenFound`
+- `updateLegalForm_ShouldReturnEmptyWhenNotFound`
+- `deleteLegalForm_ShouldDeleteWhenFound`
+- `deleteLegalForm_ShouldReturnEmptyWhenNotFound`
+
+### [LanguageLocaleServiceImplTest](services/locale/v1/LanguageLocaleServiceImplTest.java)
+
+- `listLanguageLocales_ShouldReturnPaginatedResponse`
+- `createLanguageLocale_ShouldReturnCreatedLanguageLocale`
+- `getLanguageLocale_ShouldReturnLanguageLocaleWhenFound`
+- `getLanguageLocale_ShouldReturnEmptyWhenNotFound`
+- `updateLanguageLocale_ShouldReturnUpdatedLanguageLocaleWhenFound`
+- `updateLanguageLocale_ShouldReturnEmptyWhenNotFound`
+- `deleteLanguageLocale_ShouldDeleteWhenFound`
+- `deleteLanguageLocale_ShouldReturnEmptyWhenNotFound`
+
+### [LookupDomainServiceImplTest](services/lookup/v1/LookupDomainServiceImplTest.java)
+
+- `listDomains_ShouldReturnPaginatedResponse`
+- `createDomain_ShouldReturnCreatedEntity`
+- `getDomain_ShouldReturnEntityWhenFound`
+- `getDomain_ShouldReturnEmptyWhenNotFound`
+- `updateDomain_ShouldReturnUpdatedEntityWhenFound`
+- `updateDomain_ShouldReturnEmptyWhenNotFound`
+- `deleteDomain_ShouldDeleteWhenFound`
+- `deleteDomain_ShouldReturnEmptyWhenNotFound`
+
+### [LookupItemServiceImplTest](services/lookup/v1/LookupItemServiceImplTest.java)
+
+- `listItems_ShouldReturnPaginatedResponse`
+- `getItemsByDomain_ShouldReturnItems`
+- `createItem_ShouldReturnCreatedEntity`
+- `getItem_ShouldReturnEntityWhenFound`
+- `getItem_ShouldReturnEmptyWhenNotFound`
+- `updateItem_ShouldReturnUpdatedEntityWhenFound`
+- `updateItem_ShouldReturnEmptyWhenNotFound`
+- `deleteItem_ShouldDeleteWhenFound`
+- `deleteItem_ShouldReturnEmptyWhenNotFound`
+
+### [MessageTypeCatalogServiceImplTest](services/notification/v1/MessageTypeCatalogServiceImplTest.java)
+
+- `listMessageTypes_ShouldReturnPaginatedResponse`
+- `createMessageType_ShouldReturnCreatedMessageType`
+- `getMessageType_ShouldReturnMessageType_WhenFound`
+- `getMessageTypeByCode_ShouldReturnMessageType_WhenFound`
+- `updateMessageType_ShouldReturnUpdatedMessageType_WhenFound`
+- `deleteMessageType_ShouldDeleteMessageType_WhenFound`
+
+### [NotificationMessageCatalogServiceImplTest](services/notification/v1/NotificationMessageCatalogServiceImplTest.java)
+
+- `listNotificationMessages_ShouldReturnPaginatedResponse`
+- `createNotificationMessage_ShouldReturnCreatedMessage`
+- `getNotificationMessage_ShouldReturnMessage_WhenFound`
+- `getNotificationMessage_ShouldReturnError_WhenNotFound`
+- `getNotificationMessageByCode_ShouldReturnMessage_WhenFound`
+- `updateNotificationMessage_ShouldReturnUpdatedMessage_WhenFound`
+- `deleteNotificationMessage_ShouldDeleteMessage_WhenFound`
+
+### [RelationshipTypeMasterServiceImplTest](services/relationships/v1/RelationshipTypeMasterServiceImplTest.java)
+
+- `listRelationshipTypes_ShouldReturnPaginatedResponse`
+- `createRelationshipType_ShouldReturnCreatedEntity`
+- `getRelationshipType_ShouldReturnEntityWhenFound`
+- `getRelationshipType_ShouldReturnEmptyWhenNotFound`
+- `updateRelationshipType_ShouldReturnUpdatedEntityWhenFound`
+- `updateRelationshipType_ShouldReturnEmptyWhenNotFound`
+- `deleteRelationshipType_ShouldDeleteWhenFound`
+- `deleteRelationshipType_ShouldReturnEmptyWhenNotFound`
+
+### [TitleMasterServiceImplTest](services/title/v1/TitleMasterServiceImplTest.java)
+
+- `listTitles_ShouldReturnPaginatedResponse`
+- `createTitle_ShouldReturnCreatedEntity`
+- `getTitle_ShouldReturnEntityWhenFound`
+- `getTitle_ShouldReturnEmptyWhenNotFound`
+- `updateTitle_ShouldReturnUpdatedEntityWhenFound`
+- `updateTitle_ShouldReturnEmptyWhenNotFound`
+- `deleteTitle_ShouldDeleteWhenFound`
+- `deleteTitle_ShouldReturnEmptyWhenNotFound`
+
+## Actual source example
+
+This excerpt is `findByDocumentId_ShouldReturnLocalizations` from [IdentityDocumentLocalizationRepositoryTest](repositories/identitydocument/v1/IdentityDocumentLocalizationRepositoryTest.java). Use the surrounding class's imports and fixture setup; this excerpt is not a standalone Java program.
 
 ```java
 @Test
-void methodName_Scenario_ExpectedBehavior() {
-    // Arrange - Set up test conditions
-    UUID testEntityId = UUID.randomUUID();
-    when(repository.findById(any(UUID.class))).thenReturn(Mono.just(entity));
-    when(mapper.toDTO(any(Entity.class))).thenReturn(dto);
+void findByDocumentId_ShouldReturnLocalizations() {
+    // Arrange
+    when(repository.findByDocumentId(any(UUID.class), any(Pageable.class))).thenReturn(Flux.just(entity));
 
-    // Act - Call the method being tested
-    Mono<DTO> result = service.getEntity(testEntityId);
+    // Act
+    Flux<IdentityDocumentLocalization> result = repository.findByDocumentId(testDocumentId, pageable);
 
-    // Assert - Verify the expected behavior
+    // Assert
     StepVerifier.create(result)
-            .expectNext(dto)
+            .expectNext(entity)
             .verifyComplete();
-
-    // Verify interactions with mocks
-    verify(repository).findById(any(UUID.class));
-    verify(mapper).toDTO(any(Entity.class));
 }
 ```
 
-## Extending the Test Suite
+## Interpret and recover
 
-When adding new services to the application, follow these steps to create corresponding tests:
+- A Reactor assertion must subscribe and verify termination; constructing a `Mono` alone does not execute it. Match emitted values, empty completion, and errors to the production contract rather than converting every absence to success.
+- A repository or mapper mock verifies a local call/result, not committed database state. A stubbed service method or static filter utility does not exercise its implementation. Use real HTTP/SDK/database cases for those boundaries.
+- For a failing mock assertion, reread the production branch and fixture data before changing expected values. Do not make a test pass by manufacturing the behavior inside a save callback.
+- For dependency resolution or Java errors, verify the actual Maven runtime and matching reactor artifacts. For no matching tests, check the class name and module rather than disabling all tests.
+- Coverage requires a configured measurement run and inspected report. Neither a class list nor a successful Maven exit proves every operation, error branch, authorization rule, provider interaction, or customer journey is covered.
 
-1. Create a new test class in the appropriate package
-2. Follow the established test patterns
-3. Ensure all CRUD operations and business logic are covered
-4. Use the existing test utilities where appropriate
+## Maintain this guide
 
-## Best Practices
-
-1. **Isolation**: Each test should be independent and not rely on the state from other tests
-2. **Mocking**: Mock all dependencies to ensure true unit testing
-3. **Naming**: Use descriptive test method names that indicate what is being tested and the expected behavior
-4. **Verification**: Verify all interactions with mocked dependencies
-5. **Edge Cases**: Test both happy path and edge cases (e.g., not found scenarios)
-
-## Troubleshooting
-
-### Common Issues
-
-1. **NullPointerException in tests**: Ensure all mocked methods are properly stubbed
-2. **StepVerifier timeout**: Check that the reactive stream completes properly
-3. **Verification errors**: Ensure the expected interactions with mocks match the actual implementation
-
-### Debugging Tips
-
-1. Use `StepVerifier.create(result).log()` to log all signals from the reactive stream
-2. Use `Mockito.verify(mock, Mockito.times(n))` to verify the exact number of interactions
-3. Check that the test data matches the expectations of the service implementation
+Keep the inventory and runnable class selector aligned with the linked sources. Add regression cases for changed behavior, then record the command, fixture boundary, source revision, and reports in the relevant implementation review. Preserve separate evidence for unit behavior, transport contracts, database recovery, provider sandbox behavior, and live-provider acceptance.
