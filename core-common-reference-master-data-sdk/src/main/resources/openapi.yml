@@ -4896,6 +4896,27 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DocumentTemplateLocalizationDTO"
+  /api/v1/document-reference-current-observations:
+    post:
+      tags:
+      - document-reference-current-controller
+      summary: Observe exact finite source/layout references for caller product intent;
+        no product or asset admission
+      operationId: observeCurrentDocumentReferences
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentReferenceCurrentTarget"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentReferenceCurrent"
+      x-disable-idempotency: true
   /api/v1/document-layout-publications/{layoutRevisionId}/retire:
     post:
       tags:
@@ -10055,23 +10076,95 @@ components:
           maxLength: 50
           minLength: 0
           type: string
-    DocumentLayoutRetireRequest:
+    DocumentReferenceCurrentTarget:
       required:
-      - actionId
-      - expectedStateVersion
-      - reason
+      - documentType
+      - layout
+      - locale
+      - product
+      - purpose
+      - template
       type: object
       properties:
-        actionId:
+        product:
+          $ref: "#/components/schemas/DocumentReferenceProductScope"
+        purpose:
+          type: string
+          enum:
+          - DEPOSIT_ACCOUNT_ENROLLMENT
+        documentType:
+          maxLength: 100
+          pattern: "[A-Z][A-Z0-9_]{0,99}"
+          type: string
+        locale:
+          maxLength: 50
+          pattern: "[A-Za-z0-9][A-Za-z0-9_-]{0,49}"
+          type: string
+        template:
+          $ref: "#/components/schemas/DocumentReferenceExact"
+        layout:
+          $ref: "#/components/schemas/DocumentReferenceExact"
+      additionalProperties: false
+    DocumentReferenceExact:
+      required:
+      - digest
+      - id
+      - kind
+      - owner
+      - versionFormat
+      - versionText
+      type: object
+      properties:
+        owner:
+          type: string
+          enum:
+          - core-common-reference-master-data
+        kind:
+          type: string
+          enum:
+          - DOCUMENT_TEMPLATE
+          - DOCUMENT_LAYOUT
+        id:
           type: string
           format: uuid
-        expectedStateVersion:
-          maximum: 0
-          minimum: 0
-          type: integer
-          format: int32
-        reason:
-          maxLength: 500
+        versionFormat:
+          type: string
+          enum:
+          - OPAQUE
+        versionText:
+          maxLength: 20
+          pattern: "[A-Za-z0-9][A-Za-z0-9._-]{0,19}"
+          type: string
+        digest:
+          pattern: "[0-9a-f]{64}"
+          type: string
+      additionalProperties: false
+    DocumentReferenceProductScope:
+      required:
+      - definitionDigest
+      - productId
+      - publicationId
+      - revisionId
+      - rootId
+      - tenantId
+      type: object
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+        rootId:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        revisionId:
+          type: string
+          format: uuid
+        publicationId:
+          type: string
+          format: uuid
+        definitionDigest:
           type: string
       additionalProperties: false
     DocumentLayoutDefinition:
@@ -10227,6 +10320,71 @@ components:
           pattern: "^[0-9a-f]{64}$"
           type: string
       additionalProperties: false
+    DocumentLayoutSemanticDefinition:
+      required:
+      - legalNotices
+      - orientation
+      - pageSize
+      - sectionMode
+      type: object
+      properties:
+        sectionMode:
+          type: string
+          enum:
+          - AUTHORED_PAGES
+        pageSize:
+          type: string
+          enum:
+          - A4
+        orientation:
+          type: string
+          enum:
+          - PORTRAIT
+        legalNotices:
+          maxItems: 4
+          minItems: 1
+          type: array
+          items:
+            $ref: "#/components/schemas/DocumentLayoutNoticeReference"
+      additionalProperties: false
+    DocumentReferenceCurrent:
+      required:
+      - definition
+      - effectiveUntilEpochMillis
+      - observedAtEpochMillis
+      - target
+      type: object
+      properties:
+        target:
+          $ref: "#/components/schemas/DocumentReferenceCurrentTarget"
+        definition:
+          $ref: "#/components/schemas/DocumentLayoutDefinition"
+        observedAtEpochMillis:
+          type: integer
+          format: int64
+        effectiveUntilEpochMillis:
+          type: integer
+          format: int64
+      additionalProperties: false
+    DocumentLayoutRetireRequest:
+      required:
+      - actionId
+      - expectedStateVersion
+      - reason
+      type: object
+      properties:
+        actionId:
+          type: string
+          format: uuid
+        expectedStateVersion:
+          maximum: 0
+          minimum: 0
+          type: integer
+          format: int32
+        reason:
+          maxLength: 500
+          type: string
+      additionalProperties: false
     DocumentLayoutPublicationDTO:
       type: object
       properties:
@@ -10276,33 +10434,6 @@ components:
           type: string
         retirementReason:
           type: string
-      additionalProperties: false
-    DocumentLayoutSemanticDefinition:
-      required:
-      - legalNotices
-      - orientation
-      - pageSize
-      - sectionMode
-      type: object
-      properties:
-        sectionMode:
-          type: string
-          enum:
-          - AUTHORED_PAGES
-        pageSize:
-          type: string
-          enum:
-          - A4
-        orientation:
-          type: string
-          enum:
-          - PORTRAIT
-        legalNotices:
-          maxItems: 4
-          minItems: 1
-          type: array
-          items:
-            $ref: "#/components/schemas/DocumentLayoutNoticeReference"
       additionalProperties: false
     DocumentLayoutExpectedDraftReference:
       required:
