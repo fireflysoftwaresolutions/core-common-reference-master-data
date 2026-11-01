@@ -25,3 +25,9 @@ The five-second maximum is intersected with the original paired wall/monotonic b
 Responses use `Cache-Control: no-store`: 400 for malformed targets, 403 for missing current permission, 409 for a safely established native noncurrent result and 503 for unavailable/uncertain observation. The endpoint bypasses transport response reuse; historical layout GET/resolve is not this current observation.
 
 The original OpenAPI producer declares this real controller with an unavailable metadata-only service under `openapi-gen`; it creates no native resource or successful business substitute. New SDK transport must come from that running producer and the original Generator. Source tests do not qualify native schemas, generated SDK operation execution, service-controlled assets, HTML/PDF, signing or legal/financial/product admission.
+
+## Insurance quote metadata
+
+The optional V39 migration extends the exact target purpose to `INSURANCE_TERM_PC_QUOTE` without modifying V38 or adding reader grants. Use the same separately delegated migrator after the V38 installation is qualified. The Java target, controller-generated OpenAPI, regenerated SDK, and native validator must be deployed together. The requested purpose remains part of the canonical target and the current policy context; deposit targets cannot be substituted for quote targets. Every original product identity, opaque template/layout version, digest, source graph, legal-notice binding, finite window, and before-response authority check still applies.
+
+This purpose observes metadata needed to validate a quote's contract requirement. It is not an authorization to issue a policy, sign a contract, or render or accept a document. Those operations require their own owner capabilities and journey checks.

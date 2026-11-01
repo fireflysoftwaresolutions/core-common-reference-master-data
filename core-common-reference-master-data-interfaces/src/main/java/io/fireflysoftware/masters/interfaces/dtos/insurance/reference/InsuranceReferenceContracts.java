@@ -49,8 +49,8 @@ public final class InsuranceReferenceContracts {
         public Wording{uuid(localeId);require(localeCode!=null&&localeCode.matches("[A-Za-z0-9][A-Za-z0-9_-]{0,49}"));require("text/plain".equals(mediaType));text(content,65536,true);Objects.requireNonNull(applicability);}
         @Override public String toString(){return "InsuranceWordingDefinition";}
     }
-    public record Revision(Kind kind,UUID recordId,UUID publicationId,long revision,String code,Instant effectiveFrom,
-            Instant effectiveUntil,Body definition,Provenance provenance){
+    public record Revision(Kind kind,UUID recordId,UUID publicationId,long revision,String code,@Schema(ref="#/components/schemas/FireflyInstant") Instant effectiveFrom,
+            @Schema(ref="#/components/schemas/FireflyInstant",nullable=true) Instant effectiveUntil,Body definition,Provenance provenance){
         public Revision{
             Objects.requireNonNull(kind);uuid(recordId);uuid(publicationId);require(revision>0);require(code!=null&&code.matches("[A-Z][A-Z0-9_]{0,63}"));requireTimestamp(effectiveFrom);if(effectiveUntil!=null){requireTimestamp(effectiveUntil);require(effectiveUntil.isAfter(effectiveFrom));}Objects.requireNonNull(provenance);
             require(kind==Kind.PREMIUM_TAX?definition instanceof PremiumTax:definition instanceof Wording);

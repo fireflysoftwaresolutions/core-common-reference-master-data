@@ -10092,6 +10092,7 @@ components:
           type: string
           enum:
           - DEPOSIT_ACCOUNT_ENROLLMENT
+          - INSURANCE_TERM_PC_QUOTE
         documentType:
           maxLength: 100
           pattern: "[A-Z][A-Z0-9_]{0,99}"
@@ -10838,11 +10839,9 @@ components:
         code:
           type: string
         effectiveFrom:
-          type: string
-          format: date-time
+          $ref: "#/components/schemas/FireflyInstant"
         effectiveUntil:
-          type: string
-          format: date-time
+          $ref: "#/components/schemas/FireflyInstant"
         definition:
           $ref: "#/components/schemas/Body"
         provenance:

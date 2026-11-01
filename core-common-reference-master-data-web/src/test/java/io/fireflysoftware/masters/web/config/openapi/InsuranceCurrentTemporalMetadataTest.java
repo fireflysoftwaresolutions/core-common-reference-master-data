@@ -18,4 +18,6 @@ class InsuranceCurrentTemporalMetadataTest {
         var schema=new ModelConverters().readAll(Observation.class).get("Observation");assertNotNull(schema);
         for(var name:List.of("observedAt","effectiveUntil"))assertEquals("#/components/schemas/FireflyInstant",((io.swagger.v3.oas.models.media.Schema<?>)schema.getProperties().get(name)).get$ref());
     }
+    @Test void immutableRevisionEffectivityUsesSameAbsoluteInstantScalar(){var schema=new ModelConverters().readAll(io.fireflysoftware.masters.interfaces.dtos.insurance.reference.InsuranceReferenceContracts.Revision.class).get("Revision");assertNotNull(schema);for(var name:List.of("effectiveFrom","effectiveUntil"))assertEquals("#/components/schemas/FireflyInstant",((io.swagger.v3.oas.models.media.Schema<?>)schema.getProperties().get(name)).get$ref());}
+
 }
