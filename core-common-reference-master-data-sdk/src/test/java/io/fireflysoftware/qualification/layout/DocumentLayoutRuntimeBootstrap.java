@@ -24,7 +24,6 @@ import org.fireflyframework.security.spi.*;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.*;
-import org.springframework.web.server.WebFilter;
 
 import reactor.core.publisher.Mono;
 
@@ -58,12 +57,7 @@ public final class DocumentLayoutRuntimeBootstrap {
 
         @Bean
         SecurityContextPort layoutFixtureContext() {
-            return () ->
-                    Mono.deferContextual(
-                            c ->
-                                    Mono.justOrEmpty(
-                                            c.<SecurityPrincipal>getOrEmpty(
-                                                    SecurityPrincipal.class)));
+            return new org.fireflyframework.security.webflux.context.ReactorSecurityContextAdapter();
         }
 
         @Bean
@@ -117,24 +111,23 @@ public final class DocumentLayoutRuntimeBootstrap {
         }
 
         @Bean
-        @org.springframework.core.annotation.Order(-90)
-        WebFilter layoutFixtureAuthentication() {
+        org.springframework.security.web.server.SecurityWebFilterChain layoutFixtureAuthentication(
+                org.springframework.security.config.web.server.ServerHttpSecurity http) {
             String secret = credential();
-            return (exchange, chain) -> {
-                String authorization = exchange.getRequest().getHeaders().getFirst("Authorization");
+            return io.fireflysoftware.qualification.security.NativeFixtureSecurityImpl.chain(http, authorization -> {
                 boolean normal = ("Bearer " + secret).equals(authorization),
                         denied = ("Bearer " + secret + "-denied").equals(authorization);
-                if (!normal && !denied) return chain.filter(exchange);
-                var principal =
-                        SecurityPrincipal.builder()
-                                .subject("synthetic-layout-admin")
-                                .issuer("synthetic-layout-fixture")
-                                .scopes(Set.of("layout.fixture"))
-                                .claims(Map.of("fixtureCurrentDenied", denied))
-                                .build();
-                return chain.filter(exchange)
-                        .contextWrite(c -> c.put(SecurityPrincipal.class, principal));
-            };
+                if (!normal && !denied) return null;
+                return SecurityPrincipal.builder()
+                        .subject("synthetic-layout-admin")
+                        .issuer("synthetic-layout-fixture")
+                        .scopes(Set.of("layout.fixture"))
+                        .claims(Map.of("fixtureCurrentDenied", denied))
+                        .build();
+            }, Set.of("/api/v1/language-locales", "/api/v1/document-layout-publications", "/api/v1/document-templates",
+                    "/api/v1/document-template-types", "/api/v1/document-template-localizations",
+                    "/api/v1/document-template-revisions", "/api/v1/document-reference-current-observations",
+                    "/synthetic/layout-cache-control"));
         }
     }
 

@@ -16,7 +16,7 @@
 
 package io.fireflysoftware.masters.web.controllers.document.layout.v1;
 
-import io.fireflysoftware.masters.core.services.document.v1.DocumentLayoutPublicationService;
+import io.fireflysoftware.masters.core.services.document.v1.DocumentLayoutPublicationServiceImpl;
 import io.fireflysoftware.masters.interfaces.dtos.document.layout.v1.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.*;
@@ -41,9 +41,9 @@ import java.util.UUID;
                 "Immutable master source and layout metadata authority; no renderer or output"
                         + " assets")
 public class DocumentLayoutPublicationController {
-    private final DocumentLayoutPublicationService service;
+    private final DocumentLayoutPublicationServiceImpl service;
 
-    public DocumentLayoutPublicationController(DocumentLayoutPublicationService service) {
+    public DocumentLayoutPublicationController(DocumentLayoutPublicationServiceImpl service) {
         this.service = service;
     }
 

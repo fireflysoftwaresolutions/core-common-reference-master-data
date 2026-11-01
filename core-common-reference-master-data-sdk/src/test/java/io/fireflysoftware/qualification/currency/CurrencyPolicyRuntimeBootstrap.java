@@ -21,7 +21,6 @@ import org.fireflyframework.security.spi.*;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.*;
-import org.springframework.web.server.WebFilter;
 
 import reactor.core.publisher.Mono;
 
@@ -50,6 +49,7 @@ public final class CurrencyPolicyRuntimeBootstrap {
     }
 
     @Configuration(proxyBeanMethods = false)
+    @org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
     static class Fixture {
         static String required(String key) {
             String v = System.getenv(key);
@@ -60,12 +60,7 @@ public final class CurrencyPolicyRuntimeBootstrap {
 
         @Bean
         SecurityContextPort currencyFixtureContext() {
-            return () ->
-                    Mono.deferContextual(
-                            c ->
-                                    Mono.justOrEmpty(
-                                            c.<SecurityPrincipal>getOrEmpty(
-                                                    SecurityPrincipal.class)));
+            return new org.fireflyframework.security.webflux.context.ReactorSecurityContextAdapter();
         }
 
         @Bean
@@ -134,31 +129,24 @@ public final class CurrencyPolicyRuntimeBootstrap {
         }
 
         @Bean
-        @org.springframework.core.annotation.Order(-90)
-        WebFilter currencyFixtureAuthentication() {
+        org.springframework.security.web.server.SecurityWebFilterChain currencyFixtureAuthentication(
+                org.springframework.security.config.web.server.ServerHttpSecurity http) {
             String token = required("CURRENCY_FIXTURE_CREDENTIAL");
             if (token.length() < 32)
                 throw new IllegalStateException("Private high-entropy credential required");
             Instant expiry = Instant.parse(required("CURRENCY_FIXTURE_EXPIRY"));
-            return (exchange, chain) -> {
-                String auth = exchange.getRequest().getHeaders().getFirst("Authorization");
+            return io.fireflysoftware.qualification.security.NativeFixtureSecurityImpl.chain(http, auth -> {
                 boolean normal = ("Bearer " + token).equals(auth),
                         expired = ("Bearer " + token + "-expired").equals(auth),
                         missing = ("Bearer " + token + "-missing-exp").equals(auth);
-                if (!normal && !expired && !missing) return chain.filter(exchange);
-                var principal =
-                        SecurityPrincipal.builder()
-                                .subject("synthetic-currency-author")
-                                .issuer("https://synthetic-currency.invalid")
-                                .scopes(Set.of("currency.policy.fixture"))
-                                .claims(
-                                        missing
-                                                ? Map.of()
-                                                : Map.of("exp", expired ? Instant.EPOCH : expiry))
-                                .build();
-                return chain.filter(exchange)
-                        .contextWrite(c -> c.put(SecurityPrincipal.class, principal));
-            };
+                if (!normal && !expired && !missing) return null;
+                return SecurityPrincipal.builder()
+                        .subject("synthetic-currency-author")
+                        .issuer("https://synthetic-currency.invalid")
+                        .scopes(Set.of("currency.policy.fixture"))
+                        .claims(missing ? Map.of() : Map.of("exp", expired ? Instant.EPOCH : expiry))
+                        .build();
+            }, Set.of("/api/v1/currency-execution-policies"));
         }
     }
 }

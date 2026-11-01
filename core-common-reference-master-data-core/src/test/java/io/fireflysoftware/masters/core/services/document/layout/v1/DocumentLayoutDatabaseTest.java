@@ -18,12 +18,13 @@ package io.fireflysoftware.masters.core.services.document.layout.v1;
 
 import static org.assertj.core.api.Assertions.*;
 
+import io.fireflysoftware.masters.core.fixtures.InsuranceReferenceMigrationFixture;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 
 import io.fireflysoftware.masters.core.services.document.v1.DocumentTemplateCanonicalJson;
 import io.fireflysoftware.masters.interfaces.dtos.document.layout.v1.*;
-import io.fireflysoftware.masters.models.repositories.document.v1.DocumentTemplateRevisionRepository;
+import io.fireflysoftware.masters.models.repositories.document.v1.DocumentTemplateRevisionRepositoryImpl;
 import io.r2dbc.spi.ConnectionFactories;
 
 import org.flywaydb.core.Flyway;
@@ -58,6 +59,7 @@ public class DocumentLayoutDatabaseTest {
 
     @BeforeAll
     static void migrate() throws Exception {
+        InsuranceReferenceMigrationFixture.prepare(postgres);
         Flyway.configure()
                 .dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
                 .locations("classpath:db/migration")
@@ -149,7 +151,7 @@ public class DocumentLayoutDatabaseTest {
                                 + "/"
                                 + postgres.getDatabaseName());
         String snapshot =
-                new DocumentTemplateRevisionRepository(DatabaseClient.create(factory))
+                new DocumentTemplateRevisionRepositoryImpl(DatabaseClient.create(factory))
                         .lockSource(template, "en-US")
                         .block();
         JsonNode n = JSON.readTree(snapshot);

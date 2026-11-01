@@ -1,6 +1,6 @@
 package io.fireflysoftware.masters.web.controllers.document.v1;
 
-import io.fireflysoftware.masters.core.services.document.v1.DocumentTemplateRevisionService;
+import io.fireflysoftware.masters.core.services.document.v1.DocumentTemplateRevisionServiceImpl;
 import io.fireflysoftware.masters.interfaces.dtos.document.v1.DocumentTemplatePublicationRequest;
 import io.fireflysoftware.masters.interfaces.dtos.document.v1.DocumentTemplateRevisionDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,9 +23,9 @@ import java.util.UUID;
 @RequestMapping(value = "/api/v1/document-template-revisions", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Document Template Revisions", description = "Immutable localized publications and exact revision resolution")
 public class DocumentTemplateRevisionController {
-    private final DocumentTemplateRevisionService service;
+    private final DocumentTemplateRevisionServiceImpl service;
 
-    public DocumentTemplateRevisionController(DocumentTemplateRevisionService service) {
+    public DocumentTemplateRevisionController(DocumentTemplateRevisionServiceImpl service) {
         this.service = service;
     }
 

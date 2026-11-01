@@ -61,7 +61,8 @@ class DocumentLayoutPublicationRuntimeIT {
     static int port;
 
     @BeforeAll
-    static void start() {
+    static void start() throws Exception {
+        InsuranceReferenceMigrationFixture.prepare(postgres);
         Flyway.configure()
                 .dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
                 .locations("classpath:db/migration")
@@ -120,6 +121,15 @@ class DocumentLayoutPublicationRuntimeIT {
                                 bytes, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
                     }
                 }
+                {
+                    String helper = "io/fireflysoftware/qualification/security/NativeFixtureSecurityImpl.class";
+                    var target = classes.resolve(helper);
+                    java.nio.file.Files.createDirectories(target.getParent());
+                    try (var bytes = DocumentLayoutPublicationRuntimeIT.class.getClassLoader().getResourceAsStream(helper)) {
+                        if (bytes == null) throw new IllegalStateException("Private native security helper absent");
+                        java.nio.file.Files.copy(bytes, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                    }
+                }
                 args.add("-Dloader.path=" + classes);
                 args.add(
                         "-Dloader.main=io.fireflysoftware.qualification.layout.DocumentLayoutRuntimeBootstrap");
@@ -142,7 +152,9 @@ class DocumentLayoutPublicationRuntimeIT {
                             "--DB_SSL_MODE=disable",
                             "--spring.flyway.enabled=false",
                             "--firefly.eda.enabled=false",
-                            "--firefly.stepevents.enabled=false"));
+                            "--firefly.stepevents.enabled=false",
+                            "--firefly.security.resource-server.permit-matchers[0]=/v3/api-docs",
+                                "--firefly.cache.default-cache-type=CAFFEINE"));
             if (trust && profile)
                 args.addAll(
                         List.of(
@@ -168,16 +180,22 @@ class DocumentLayoutPublicationRuntimeIT {
                     new ProcessBuilder(args).redirectErrorStream(true).redirectOutput(log.toFile());
             builder.environment().put("DOCUMENT_LAYOUT_FIXTURE_CREDENTIAL", CREDENTIAL);
             application = builder.start();
+            int lastReadinessStatus = -1;
+            String lastReadinessError = "NONE";
             for (int i = 0; i < 120; i++) {
                 if (!application.isAlive())
                     throw new IllegalStateException("Private layout runtime exited; see " + log);
                 try {
-                    if (call("GET", "/v3/api-docs", null, null, null).status() == 200) return;
-                } catch (Exception ignored) {
+                    lastReadinessStatus = call("GET", "/v3/api-docs", null, null, null).status();
+                    lastReadinessError = "NONE";
+                    if (lastReadinessStatus == 200) return;
+                } catch (Exception error) {
+                    lastReadinessStatus = -1;
+                    lastReadinessError = error.getClass().getSimpleName();
                 }
                 Thread.sleep(250);
             }
-            throw new IllegalStateException("Private layout runtime startup timed out; see " + log);
+            throw new IllegalStateException("Private layout runtime startup timed out; status=" + lastReadinessStatus + "; errorClass=" + lastReadinessError + "; bodySha256=UNAVAILABLE_PARSED_RESPONSE; see " + log);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -713,7 +731,7 @@ class DocumentLayoutPublicationRuntimeIT {
                                             CREDENTIAL,
                                             null)
                                     .status())
-                    .isEqualTo(403);
+                    .isEqualTo(401);
             assertThat(
                             call(
                                             "GET",
@@ -723,7 +741,7 @@ class DocumentLayoutPublicationRuntimeIT {
                                             CREDENTIAL,
                                             null)
                                     .status())
-                    .isEqualTo(403);
+                    .isEqualTo(401);
         } finally {
             stop();
             boot(true, true);

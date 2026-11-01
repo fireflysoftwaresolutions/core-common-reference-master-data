@@ -7,7 +7,6 @@ import org.fireflyframework.security.spi.SecurityContextPort;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.web.server.WebFilter;
 import reactor.core.publisher.Mono;
 import java.util.Set;
 
@@ -27,7 +26,7 @@ public final class DocumentTemplateRuntimeBootstrap {
                             principal.scopes().stream().sorted().collect(java.util.stream.Collectors.joining(",")));
         }
         @Bean SecurityContextPort syntheticSecurityContext() {
-            return () -> Mono.deferContextual(context -> Mono.justOrEmpty(context.<SecurityPrincipal>getOrEmpty(SecurityPrincipal.class)));
+            return new org.fireflyframework.security.webflux.context.ReactorSecurityContextAdapter();
         }
         @Bean PolicyDecisionPort syntheticPolicy() {
             return (principal, action, resource, context) -> Mono.just(switch (action) {
@@ -39,10 +38,10 @@ public final class DocumentTemplateRuntimeBootstrap {
                 default -> Decision.deny("Unknown fixture action");
             });
         }
-        @Bean @org.springframework.core.annotation.Order(-90) WebFilter syntheticAuthentication() {
-            return (exchange, chain) -> {
-                String authorization = exchange.getRequest().getHeaders().getFirst("Authorization");
-                SecurityPrincipal principal = switch (authorization == null ? "" : authorization) {
+        @Bean org.springframework.security.web.server.SecurityWebFilterChain syntheticAuthentication(
+                org.springframework.security.config.web.server.ServerHttpSecurity http) {
+            return io.fireflysoftware.qualification.security.NativeFixtureSecurityImpl.chain(http, authorization -> {
+                return switch (authorization == null ? "" : authorization) {
                     case "Bearer synthetic-admin" -> SecurityPrincipal.builder().subject("synthetic-document-admin")
                             .issuer("synthetic-test-fixture").scopes(Set.of("templates.read", "templates.resolve", "templates.admin")).build();
                     case "Bearer synthetic-admin-current-policy-denied" -> SecurityPrincipal.builder().subject("synthetic-document-admin")
@@ -54,8 +53,9 @@ public final class DocumentTemplateRuntimeBootstrap {
                             .issuer("synthetic-test-fixture").scopes(Set.of("templates.resolve")).build();
                     default -> null;
                 };
-                return principal == null ? chain.filter(exchange) : chain.filter(exchange).contextWrite(context -> context.put(SecurityPrincipal.class, principal));
-            };
+            }, Set.of("/api/v1/language-locales", "/api/v1/countries", "/api/v1/currencies",
+                    "/api/v1/bank-institution-codes", "/api/v1/document-templates", "/api/v1/document-template-types",
+                    "/api/v1/document-template-localizations", "/api/v1/document-template-revisions"));
         }
     }
 }

@@ -44,7 +44,7 @@ public final class NativeCurrencyPolicyCurrentObservationServiceImpl implements 
                     return reader.read(target,actor,new OriginalBudget(authenticated,cap)).switchIfEmpty(Mono.error(failure(CurrencyPolicyCurrentFailure.Kind.NOT_CURRENT)))
                         .timeout(authenticated.remaining()).flatMap(snapshot->{
                             if(snapshot.stamp()==null||!target.equals(snapshot.stamp().target()))throw failure(CurrencyPolicyCurrentFailure.Kind.UNAVAILABLE);
-                            CurrencyPolicyCurrentValidator.checked(reference,target.postedScale(),snapshot.publication(),clock.instant());
+                            CurrencyPolicyCurrentValidatorImpl.checked(reference,target.postedScale(),snapshot.publication(),clock.instant());
                             var retained=authenticated.intersect(snapshot.budget());
                             Instant absolute=minimum(cap,snapshot.absoluteUntil(),snapshot.stamp().effectiveUntil(),
                                     snapshot.publication().effectiveToEpochMillis()==null?null:Instant.ofEpochMilli(snapshot.publication().effectiveToEpochMillis()));

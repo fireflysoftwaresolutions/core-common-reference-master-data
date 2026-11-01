@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.fireflysoftware.masters.interfaces.dtos.document.v1.DocumentTemplatePublicationRequest;
 import io.fireflysoftware.masters.interfaces.dtos.document.v1.DocumentTemplateRevisionDTO;
 import io.fireflysoftware.masters.models.entities.document.v1.DocumentTemplateRevision;
-import io.fireflysoftware.masters.models.repositories.document.v1.DocumentTemplateRevisionRepository;
+import io.fireflysoftware.masters.models.repositories.document.v1.DocumentTemplateRevisionRepositoryImpl;
 import org.fireflyframework.validators.schema.OfflineJsonSchemaValidator;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -29,15 +29,15 @@ import java.util.Set;
 import java.util.UUID;
 
 /** Publication and retirement commands are deliberately separate from legacy mutable draft CRUD. */
-@Service
-public class DocumentTemplateRevisionService {
-    private final DocumentTemplateRevisionRepository repository;
+@Service("documentTemplateRevisionService")
+public class DocumentTemplateRevisionServiceImpl {
+    private final DocumentTemplateRevisionRepositoryImpl repository;
     private final ObjectMapper mapper;
     private final TransactionalOperator transactions;
     private final DocumentTemplateAccessGuard access;
     private final OfflineJsonSchemaValidator schemas = new OfflineJsonSchemaValidator();
 
-    public DocumentTemplateRevisionService(DocumentTemplateRevisionRepository repository, ObjectMapper mapper,
+    public DocumentTemplateRevisionServiceImpl(DocumentTemplateRevisionRepositoryImpl repository, ObjectMapper mapper,
             ReactiveTransactionManager transactions, DocumentTemplateAccessGuard access) {
         this.repository = repository;
         this.mapper = mapper.copy().enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)

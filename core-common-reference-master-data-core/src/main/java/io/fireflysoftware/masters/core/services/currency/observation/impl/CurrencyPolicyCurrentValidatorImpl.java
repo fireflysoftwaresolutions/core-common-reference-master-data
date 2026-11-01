@@ -10,7 +10,7 @@ import java.security.MessageDigest;
 import java.time.*;
 import java.util.*;
 /** The existing complete immutable definition/source validator, shared without a new encoding. */
-final class CurrencyPolicyCurrentValidator {
+final class CurrencyPolicyCurrentValidatorImpl {
     private static final Duration LIMIT=Duration.ofSeconds(5);
     private static final Set<String> SOURCE_FIELDS=Set.of("currencyId","isoCode","currencyName","symbol","decimalPrecision","isMajor","status","dateCreated","dateUpdated");
     private static final JsonMapper JSON=JsonMapper.builder().enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION).build();

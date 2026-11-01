@@ -20,8 +20,8 @@ import io.fireflysoftware.masters.interfaces.dtos.document.layout.v1.*;
 import io.fireflysoftware.masters.interfaces.dtos.document.v1.DocumentTemplatePublicationRequest;
 import io.fireflysoftware.masters.models.entities.document.layout.v1.DocumentLayoutPublication;
 import io.fireflysoftware.masters.models.entities.document.v1.DocumentTemplateRevision;
-import io.fireflysoftware.masters.models.repositories.document.layout.v1.DocumentLayoutRepository;
-import io.fireflysoftware.masters.models.repositories.document.v1.DocumentTemplateRevisionRepository;
+import io.fireflysoftware.masters.models.repositories.document.layout.v1.DocumentLayoutRepositoryImpl;
+import io.fireflysoftware.masters.models.repositories.document.v1.DocumentTemplateRevisionRepositoryImpl;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.*;
@@ -37,11 +37,11 @@ import java.time.Clock;
 import java.util.*;
 
 /** Authorizes observations before acquiring local publication locks. */
-@Service
-public class DocumentLayoutPublicationService {
-    private final DocumentTemplateRevisionService publications;
-    private final DocumentTemplateRevisionRepository masters;
-    private final DocumentLayoutRepository layouts;
+@Service("documentLayoutPublicationService")
+public class DocumentLayoutPublicationServiceImpl {
+    private final DocumentTemplateRevisionServiceImpl publications;
+    private final DocumentTemplateRevisionRepositoryImpl masters;
+    private final DocumentLayoutRepositoryImpl layouts;
     private final TransactionalOperator transactions;
     private final DocumentTemplateAccessGuard access;
     private final DocumentLayoutProfileRegistry profiles;
@@ -56,10 +56,10 @@ public class DocumentLayoutPublicationService {
 
     private static final class ConcurrentAction extends RuntimeException {}
 
-    public DocumentLayoutPublicationService(
-            DocumentTemplateRevisionService publications,
-            DocumentTemplateRevisionRepository masters,
-            DocumentLayoutRepository layouts,
+    public DocumentLayoutPublicationServiceImpl(
+            DocumentTemplateRevisionServiceImpl publications,
+            DocumentTemplateRevisionRepositoryImpl masters,
+            DocumentLayoutRepositoryImpl layouts,
             ReactiveTransactionManager manager,
             DocumentTemplateAccessGuard access,
             DocumentLayoutProfileRegistry profiles,
@@ -317,7 +317,7 @@ public class DocumentLayoutPublicationService {
     }
 
     private Mono<PublicationOutcome> publicationReplay(
-            DocumentLayoutRepository.Action action,
+            DocumentLayoutRepositoryImpl.Action action,
             UUID template,
             DocumentLayoutRules.Canonical intent) {
         return stored(action.layoutRevisionId())

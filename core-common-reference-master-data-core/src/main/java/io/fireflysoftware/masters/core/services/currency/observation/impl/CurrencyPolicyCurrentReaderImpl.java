@@ -45,7 +45,7 @@ public final class CurrencyPolicyCurrentReaderImpl implements CurrencyPolicyCurr
                     var view=new CurrencyPolicyView(new CurrencyPolicyReference(row.policyId().toString(),row.currencyId().toString(),row.isoCode(),row.version(),row.definitionDigest(),row.encodingVersion()),
                             row.canonicalEncoding(),row.sourceEncoding(),row.sourceDigest(),row.postedScale(),row.effectiveFrom(),row.effectiveTo(),row.provenanceReference(),row.publicationActionId().toString(),row.publishedAt(),row.lifecycle(),row.stateVersion(),row.observedAt(),
                             row.lifecycle().equals("PUBLISHED")&&row.observedAt()>=row.effectiveFrom()&&(row.effectiveTo()==null||row.observedAt()<row.effectiveTo()));
-                    CurrencyPolicyCurrentValidator.checked(ref,target.postedScale(),view,clock.instant());
+                    CurrencyPolicyCurrentValidatorImpl.checked(ref,target.postedScale(),view,clock.instant());
                     var snapshot=new Snapshot(view,stamp,window.budget(),window.until());
                     return context.complete(request).filter(Boolean.TRUE::equals).switchIfEmpty(Mono.error(unavailable())).then(Mono.fromSupplier(()->{requireGraph();window.budget().remaining();return snapshot;}));
                 });

@@ -11,12 +11,12 @@ import io.fireflysoftware.masters.interfaces.dtos.insurance.reference.InsuranceR
 import reactor.core.publisher.Mono;
 
 /** Durable sandbox adapter. A sandbox label/reference constructor never establishes eligibility. */
-public final class DurableInsuranceSandboxSourceVerifier implements InsuranceReferenceSourceVerifier {
+public final class DurableInsuranceSandboxSourceVerifierImpl implements InsuranceReferenceSourceVerifier {
     private final InsuranceSandboxFactReader source;
     private final CurrencyPolicyCurrentObservationService currency;
     private final Clock clock;
     private final LongSupplier nanos;
-    public DurableInsuranceSandboxSourceVerifier(InsuranceSandboxFactReader source,CurrencyPolicyCurrentObservationService currency,Clock clock,LongSupplier nanos){this.source=Objects.requireNonNull(source);this.currency=Objects.requireNonNull(currency);this.clock=Objects.requireNonNull(clock);this.nanos=Objects.requireNonNull(nanos);}
+    public DurableInsuranceSandboxSourceVerifierImpl(InsuranceSandboxFactReader source,CurrencyPolicyCurrentObservationService currency,Clock clock,LongSupplier nanos){this.source=Objects.requireNonNull(source);this.currency=Objects.requireNonNull(currency);this.clock=Objects.requireNonNull(clock);this.nanos=Objects.requireNonNull(nanos);}
     private record CurrencyChecked(R2dbcOperationBudget budget,Instant until) {}
     @Override public Mono<Evidence> verify(Revision expected){return Mono.defer(()->source.observe(expected).switchIfEmpty(Mono.error(InsuranceSandboxSourceRules.unavailable())).flatMap(first->{
         first.budget().remaining();String digest=InsuranceReferenceCodec.digest(expected);if(!digest.equals(first.definitionDigest()))throw InsuranceSandboxSourceRules.unavailable();

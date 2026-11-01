@@ -97,7 +97,7 @@ public final class CurrencyPolicyCurrentObservationServiceImpl
     }
 
     private static void checked(CurrencyPolicyReference expected,int scale,CurrencyPolicyView value,Instant now) {
-        CurrencyPolicyCurrentValidator.checked(expected,scale,value,now);
+        CurrencyPolicyCurrentValidatorImpl.checked(expected,scale,value,now);
     }
 
     private static String digest(String value) throws Exception {

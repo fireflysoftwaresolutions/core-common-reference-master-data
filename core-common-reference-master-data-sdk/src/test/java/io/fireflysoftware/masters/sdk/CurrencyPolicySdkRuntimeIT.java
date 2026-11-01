@@ -77,6 +77,7 @@ class CurrencyPolicySdkRuntimeIT {
 
     @BeforeAll
     static void start() throws Exception {
+        InsuranceReferenceMigrationFixture.prepare(postgres);
         owner(
                 "CREATE ROLE firefly_currency_policy_guard NOLOGIN NOSUPERUSER NOBYPASSRLS; CREATE"
                         + " ROLE currency_http_app LOGIN PASSWORD 'synthetic-only' NOSUPERUSER"
@@ -89,7 +90,7 @@ class CurrencyPolicySdkRuntimeIT {
         owner(
                 "REVOKE CREATE ON SCHEMA public FROM PUBLIC; GRANT USAGE ON SCHEMA public TO"
                     + " currency_http_app; GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN"
-                    + " SCHEMA public TO currency_http_app; INSERT INTO"
+                    + " SCHEMA public TO currency_http_app; GRANT EXECUTE ON FUNCTION public.currency_policy_lock_source(UUID) TO currency_http_app; INSERT INTO"
                     + " currencies(currency_id,iso_code,currency_name,symbol,decimal_precision,is_major,status)"
                     + " VALUES('"
                         + CURRENCY
@@ -143,6 +144,15 @@ class CurrencyPolicySdkRuntimeIT {
                             .getResourceAsStream(resource)) {
                 if (bytes == null)
                     throw new IllegalStateException("Private currency bootstrap missing");
+                Files.copy(bytes, target, StandardCopyOption.REPLACE_EXISTING);
+            }
+        }
+        {
+            String helper = "io/fireflysoftware/qualification/security/NativeFixtureSecurityImpl.class";
+            var target = classes.resolve(helper);
+            Files.createDirectories(target.getParent());
+            try (var bytes = CurrencyPolicySdkRuntimeIT.class.getClassLoader().getResourceAsStream(helper)) {
+                if (bytes == null) throw new IllegalStateException("Private native security helper absent");
                 Files.copy(bytes, target, StandardCopyOption.REPLACE_EXISTING);
             }
         }
@@ -222,7 +232,9 @@ class CurrencyPolicySdkRuntimeIT {
                                 "--DB_SSL_MODE=disable",
                                 "--spring.flyway.enabled=false",
                                 "--firefly.eda.enabled=false",
-                                "--firefly.stepevents.enabled=false"));
+                                "--firefly.stepevents.enabled=false",
+                                "--firefly.security.resource-server.permit-matchers[0]=/v3/api-docs",
+                                "--firefly.cache.default-cache-type=CAFFEINE"));
         if (!projectPolicy) args.add("--fixture.currency.policy.enabled=false");
         if (frameworkFallback)
             args.add(
@@ -241,15 +253,26 @@ class CurrencyPolicySdkRuntimeIT {
         if (frameworkFallback)
             builder.environment().put("CURRENCY_FIXTURE_FRAMEWORK_FALLBACK", "true");
         app = builder.start();
+        int lastReadinessStatus = -1;
+        String lastReadinessError = "NONE";
+        String lastReadinessBodySha = "UNAVAILABLE";
         for (int i = 0; i < 160; i++) {
             if (!app.isAlive()) throw new IllegalStateException("Private currency app exited");
             try {
-                if (call("GET", "/v3/api-docs", null, null, null).statusCode() == 200) return;
-            } catch (Exception ignored) {
+                var readiness = call("GET", "/v3/api-docs", null, null, null);
+                lastReadinessStatus = readiness.statusCode();
+                lastReadinessError = "NONE";
+                lastReadinessBodySha = HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256")
+                        .digest(readiness.body().getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+                if (lastReadinessStatus == 200) return;
+            } catch (Exception error) {
+                lastReadinessStatus = -1;
+                lastReadinessBodySha = "UNAVAILABLE";
+                lastReadinessError = error.getClass().getSimpleName();
             }
             Thread.sleep(250);
         }
-        throw new IllegalStateException("Private currency app startup timeout");
+        throw new IllegalStateException("Private currency app startup timeout; status=" + lastReadinessStatus + "; errorClass=" + lastReadinessError + "; bodyUtf8Sha256=" + lastReadinessBodySha);
     }
 
     static CurrencyExecutionPoliciesApi api(String token) {

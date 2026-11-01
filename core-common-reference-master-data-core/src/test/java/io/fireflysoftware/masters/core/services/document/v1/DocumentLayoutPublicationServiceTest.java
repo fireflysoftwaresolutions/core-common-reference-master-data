@@ -18,13 +18,14 @@ package io.fireflysoftware.masters.core.services.document.v1;
 
 import static org.assertj.core.api.Assertions.*;
 
+import io.fireflysoftware.masters.core.fixtures.InsuranceReferenceMigrationFixture;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 
 import io.fireflysoftware.masters.core.services.document.layout.v1.*;
 import io.fireflysoftware.masters.interfaces.dtos.document.layout.v1.*;
 import io.fireflysoftware.masters.interfaces.dtos.document.v1.DocumentTemplatePublicationRequest;
-import io.fireflysoftware.masters.models.repositories.document.layout.v1.DocumentLayoutRepository;
-import io.fireflysoftware.masters.models.repositories.document.v1.DocumentTemplateRevisionRepository;
+import io.fireflysoftware.masters.models.repositories.document.layout.v1.DocumentLayoutRepositoryImpl;
+import io.fireflysoftware.masters.models.repositories.document.v1.DocumentTemplateRevisionRepositoryImpl;
 import io.r2dbc.spi.*;
 
 import org.fireflyframework.security.api.domain.*;
@@ -69,6 +70,7 @@ class DocumentLayoutPublicationServiceTest {
 
     @BeforeAll
     static void migrate() throws Exception {
+        InsuranceReferenceMigrationFixture.prepare(postgres);
         Flyway.configure()
                 .dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
                 .locations("classpath:db/migration")
@@ -119,10 +121,10 @@ class DocumentLayoutPublicationServiceTest {
         final AtomicReference<java.util.function.Function<Map<String, Object>, Mono<Void>>>
                 policyHook = new AtomicReference<>(c -> Mono.empty());
         final AtomicBoolean changedProfile = new AtomicBoolean();
-        final DocumentTemplateRevisionRepository masters =
-                new DocumentTemplateRevisionRepository(db);
-        final DocumentTemplateRevisionService v1;
-        final DocumentLayoutPublicationService service;
+        final DocumentTemplateRevisionRepositoryImpl masters =
+                new DocumentTemplateRevisionRepositoryImpl(db);
+        final DocumentTemplateRevisionServiceImpl v1;
+        final DocumentLayoutPublicationServiceImpl service;
         final UUID template;
         final DocumentLayoutMasterReference notice;
 
@@ -139,7 +141,7 @@ class DocumentLayoutPublicationServiceTest {
             legacyBeans.addBean(
                     "policy", (PolicyDecisionPort) (p, a, r, c) -> Mono.just(Decision.permit()));
             v1 =
-                    new DocumentTemplateRevisionService(
+                    new DocumentTemplateRevisionServiceImpl(
                             masters,
                             JsonMapper.builder().build(),
                             manager,
@@ -220,10 +222,10 @@ class DocumentLayoutPublicationServiceTest {
                                                                                                 .permit())));
                             });
             service =
-                    new DocumentLayoutPublicationService(
+                    new DocumentLayoutPublicationServiceImpl(
                             v1,
                             masters,
-                            new DocumentLayoutRepository(db),
+                            new DocumentLayoutRepositoryImpl(db),
                             manager,
                             new DocumentTemplateAccessGuard(
                                     beans.getBeanProvider(SecurityContextPort.class),

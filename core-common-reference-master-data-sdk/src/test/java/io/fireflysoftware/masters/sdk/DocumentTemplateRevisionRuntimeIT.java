@@ -42,7 +42,8 @@ class DocumentTemplateRevisionRuntimeIT {
     private static int port;
     private static final Duration TIMEOUT = Duration.ofSeconds(20);
 
-    @BeforeAll static void start() {
+    @BeforeAll static void start() throws Exception {
+        InsuranceReferenceMigrationFixture.prepare(postgres);
         Flyway.configure().dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
                 .locations("classpath:db/migration").load().migrate();
         boot();
@@ -72,20 +73,29 @@ class DocumentTemplateRevisionRuntimeIT {
                     "--DB_HOST=" + postgres.getHost(), "--DB_PORT=" + postgres.getMappedPort(5432),
                     "--DB_NAME=" + postgres.getDatabaseName(), "--DB_USERNAME=" + postgres.getUsername(),
                     "--DB_PASSWORD=" + postgres.getPassword(), "--DB_SSL_MODE=disable", "--spring.flyway.enabled=false",
-                    "--firefly.eda.enabled=false", "--firefly.stepevents.enabled=false"));
+                    "--firefly.eda.enabled=false", "--firefly.stepevents.enabled=false",
+                    "--firefly.security.resource-server.permit-matchers[0]=/v3/api-docs",
+                                "--firefly.cache.default-cache-type=CAFFEINE"));
             var log = java.nio.file.Path.of("target/document-runtime-" + (syntheticTrust ? "trusted-" : "unconfigured-") + port + ".log").toFile();
             application = new ProcessBuilder(args).redirectErrorStream(true).redirectOutput(log).start();
             var http = java.net.http.HttpClient.newHttpClient();
+            int lastReadinessStatus = -1;
+            String lastReadinessError = "NONE";
             for (int attempt=0; attempt<120; attempt++) {
                 if (!application.isAlive()) throw new IllegalStateException("Document runtime exited; see " + log);
                 try {
                     var response = http.send(java.net.http.HttpRequest.newBuilder(java.net.URI.create("http://127.0.0.1:" + port + "/v3/api-docs"))
                             .timeout(Duration.ofSeconds(1)).build(), java.net.http.HttpResponse.BodyHandlers.discarding());
-                    if (response.statusCode()==200) return;
-                } catch (java.io.IOException ignored) { }
+                    lastReadinessStatus = response.statusCode();
+                    lastReadinessError = "NONE";
+                    if (lastReadinessStatus==200) return;
+                } catch (java.io.IOException error) {
+                    lastReadinessStatus = -1;
+                    lastReadinessError = error.getClass().getSimpleName();
+                }
                 Thread.sleep(250);
             }
-            throw new IllegalStateException("Document runtime startup timed out; see " + log);
+            throw new IllegalStateException("Document runtime startup timed out; status=" + lastReadinessStatus + "; errorClass=" + lastReadinessError + "; bodySha256=UNAVAILABLE_DISCARDED; see " + log);
         } catch (java.io.IOException error) {
             throw new IllegalStateException("Document runtime could not start", error);
         } catch (InterruptedException error) {
@@ -233,11 +243,11 @@ class DocumentTemplateRevisionRuntimeIT {
         for (String path : java.util.List.of("/api/v1/document-templates/" + draft.catalog().getTemplateId(),
                 "/api/v1/document-template-types", "/api/v1/document-template-localizations/template/" + draft.catalog().getTemplateId())) {
             assertThat(publicHttp.get().uri(path).header("X-Actor", "synthetic-document-admin").header("X-Tenant-Id", "synthetic-admin")
-                    .exchangeToMono(response -> Mono.just(response.statusCode().value())).block(TIMEOUT)).isEqualTo(403);
+                    .exchangeToMono(response -> Mono.just(response.statusCode().value())).block(TIMEOUT)).isEqualTo(401);
         }
         assertDenied(() -> new DocumentTemplateRevisionsApi(client("synthetic-reader"))
                 .publishDocumentTemplateRevision(draft.catalog().getTemplateId(), publication(draft), null).block(TIMEOUT));
-        assertDenied(() -> new DocumentTemplateRevisionsApi(client(null)).getDocumentTemplateRevision(UUID.randomUUID(), null).block(TIMEOUT));
+        assertUnauthorized(() -> new DocumentTemplateRevisionsApi(client(null)).getDocumentTemplateRevision(UUID.randomUUID(), null).block(TIMEOUT));
         assertDenied(() -> new DocumentTemplateRevisionsApi(client("synthetic-reader")).resolveDocumentTemplateRevision(
                 draft.catalog().getTemplateCode(), "1", draft.localeCode(), null).block(TIMEOUT));
     }
@@ -352,9 +362,9 @@ class DocumentTemplateRevisionRuntimeIT {
         stop();
         boot(false);
         try {
-            assertDenied(() -> new DocumentTemplateRevisionsApi(client("synthetic-admin"))
+            assertUnauthorized(() -> new DocumentTemplateRevisionsApi(client("synthetic-admin"))
                     .getDocumentTemplateRevision(UUID.randomUUID(), null).block(TIMEOUT));
-            assertDenied(() -> new DocumentTemplatesApi(client("synthetic-admin"))
+            assertUnauthorized(() -> new DocumentTemplatesApi(client("synthetic-admin"))
                     .getDocumentTemplate(UUID.randomUUID(), null).block(TIMEOUT));
         } finally {
             stop();
@@ -365,6 +375,14 @@ class DocumentTemplateRevisionRuntimeIT {
     private static void assertDenied(org.assertj.core.api.ThrowableAssert.ThrowingCallable operation) {
         assertThatThrownBy(operation).isInstanceOfSatisfying(WebClientResponseException.class,
                 error -> assertThat(error.getStatusCode().value()).isEqualTo(403));
+    }
+
+    private static void assertUnauthorized(org.assertj.core.api.ThrowableAssert.ThrowingCallable operation) {
+        assertThatThrownBy(operation).isInstanceOfSatisfying(WebClientResponseException.class,
+                error -> {
+                    assertThat(error.getStatusCode().value()).isEqualTo(401);
+                    assertThat(error.getHeaders().getFirst("WWW-Authenticate")).startsWith("Bearer");
+                });
     }
 
 }

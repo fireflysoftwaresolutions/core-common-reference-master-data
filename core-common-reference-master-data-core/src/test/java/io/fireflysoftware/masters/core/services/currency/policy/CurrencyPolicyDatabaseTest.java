@@ -18,6 +18,7 @@ package io.fireflysoftware.masters.core.services.currency.policy;
 
 import static org.assertj.core.api.Assertions.*;
 
+import io.fireflysoftware.masters.core.fixtures.InsuranceReferenceMigrationFixture;
 import io.fireflysoftware.masters.interfaces.dtos.currency.policy.*;
 import io.fireflysoftware.masters.models.repositories.currency.policy.CurrencyPolicyRepository;
 import io.r2dbc.spi.*;
@@ -73,6 +74,7 @@ class CurrencyPolicyDatabaseTest {
 
     @BeforeAll
     static void migrate() throws Exception {
+        InsuranceReferenceMigrationFixture.prepare(postgres);
         owner(
                 "CREATE ROLE firefly_currency_policy_guard NOLOGIN NOSUPERUSER NOBYPASSRLS; CREATE"
                     + " ROLE currency_app LOGIN PASSWORD 'synthetic-only' NOSUPERUSER NOBYPASSRLS");
@@ -84,7 +86,8 @@ class CurrencyPolicyDatabaseTest {
         owner(
                 "REVOKE CREATE ON SCHEMA public FROM PUBLIC; GRANT USAGE ON SCHEMA public TO"
                         + " currency_app; GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA"
-                        + " public TO currency_app");
+                        + " public TO currency_app; GRANT EXECUTE ON FUNCTION"
+                        + " public.currency_policy_lock_source(UUID) TO currency_app");
     }
 
     static final class Fixture {

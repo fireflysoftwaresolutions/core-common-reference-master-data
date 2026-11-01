@@ -10,11 +10,11 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.UUID;
 
-@Repository
-public class DocumentTemplateRevisionRepository {
+@Repository("documentTemplateRevisionRepository")
+public class DocumentTemplateRevisionRepositoryImpl {
     private final DatabaseClient database;
 
-    public DocumentTemplateRevisionRepository(DatabaseClient database) {
+    public DocumentTemplateRevisionRepositoryImpl(DatabaseClient database) {
         this.database = database;
     }
 

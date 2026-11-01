@@ -4,7 +4,7 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 import io.fireflysoftware.masters.core.services.insurance.source.InsuranceSandboxFactReader;
-import io.fireflysoftware.masters.core.services.insurance.source.impl.DurableInsuranceSandboxSourceVerifier;
+import io.fireflysoftware.masters.core.services.insurance.source.impl.DurableInsuranceSandboxSourceVerifierImpl;
 import io.fireflysoftware.masters.core.services.insurance.reference.InsuranceReferenceCodec;
 import io.fireflysoftware.masters.interfaces.dtos.insurance.reference.InsuranceReferenceContracts.*;
 import io.fireflysoftware.masters.interfaces.dtos.insurance.source.InsuranceSandboxFacts.*;
@@ -36,7 +36,7 @@ class CurrencyPolicyTaxBudgetPropagationTest {
                 var budget=original.budget().intersect(R2dbcOperationBudget.observed(NOW,nativeCap,0,Duration.ofMillis(30),clock,nanos));return Mono.just(new CurrentObservation(new Current(target,view,NOW,nativeCap),budget,nativeCap));
             }
         };
-        var observed=new DurableInsuranceSandboxSourceVerifier(source,currency,clock,nanos).verify(definition).block();
+        var observed=new DurableInsuranceSandboxSourceVerifierImpl(source,currency,clock,nanos).verify(definition).block();
         assertEquals(factCap,captured.get());assertFalse(observed.effectiveUntil().isAfter(nativeCap));assertEquals(2,reads.get());
     }
 }

@@ -1,8 +1,9 @@
 package io.fireflysoftware.masters.core.services.document.v1;
 
+import io.fireflysoftware.masters.core.fixtures.InsuranceReferenceMigrationFixture;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.fireflysoftware.masters.interfaces.dtos.document.v1.DocumentTemplatePublicationRequest;
-import io.fireflysoftware.masters.models.repositories.document.v1.DocumentTemplateRevisionRepository;
+import io.fireflysoftware.masters.models.repositories.document.v1.DocumentTemplateRevisionRepositoryImpl;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import org.fireflyframework.security.api.domain.Decision;
@@ -37,7 +38,8 @@ class DocumentTemplateRevisionDatabaseTest {
                             com.github.dockerjava.api.model.Ports.Binding.bindIp("127.0.0.1"),
                             new com.github.dockerjava.api.model.ExposedPort(5432))));
 
-    @BeforeAll static void migrate() {
+    @BeforeAll static void migrate() throws Exception {
+        InsuranceReferenceMigrationFixture.prepare(postgres);
         Flyway.configure().dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
                 .locations("classpath:db/migration").load().migrate();
     }
@@ -49,17 +51,17 @@ class DocumentTemplateRevisionDatabaseTest {
 
     private DatabaseClient database() { return DatabaseClient.create(connections()); }
 
-    private DocumentTemplateRevisionService service() {
+    private DocumentTemplateRevisionServiceImpl service() {
         return service(() -> Mono.just(SecurityPrincipal.builder().subject("synthetic-document-administrator").build()),
                 (principal, action, resource, context) -> Mono.just(Decision.permit()));
     }
 
-    private DocumentTemplateRevisionService service(SecurityContextPort context, PolicyDecisionPort policy) {
+    private DocumentTemplateRevisionServiceImpl service(SecurityContextPort context, PolicyDecisionPort policy) {
         var beans = new StaticListableBeanFactory();
         if (context != null) beans.addBean("syntheticSecurityContext", context);
         if (policy != null) beans.addBean("syntheticPolicyDecision", policy);
         var factory = connections();
-        return new DocumentTemplateRevisionService(new DocumentTemplateRevisionRepository(DatabaseClient.create(factory)), JsonMapper.builder().build(),
+        return new DocumentTemplateRevisionServiceImpl(new DocumentTemplateRevisionRepositoryImpl(DatabaseClient.create(factory)), JsonMapper.builder().build(),
                 new R2dbcTransactionManager(factory), new DocumentTemplateAccessGuard(beans.getBeanProvider(SecurityContextPort.class),
                 beans.getBeanProvider(PolicyDecisionPort.class)));
     }

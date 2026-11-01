@@ -27,11 +27,11 @@ import reactor.core.publisher.*;
 
 import java.util.*;
 
-@Repository
-public class DocumentLayoutRepository {
+@Repository("documentLayoutRepository")
+public class DocumentLayoutRepositoryImpl {
     private final DatabaseClient database;
 
-    public DocumentLayoutRepository(DatabaseClient database) {
+    public DocumentLayoutRepositoryImpl(DatabaseClient database) {
         this.database = database;
     }
 

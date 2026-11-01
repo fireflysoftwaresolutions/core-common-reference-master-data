@@ -19,7 +19,7 @@ package io.fireflysoftware.masters.web.controllers.document.layout.v1;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import io.fireflysoftware.masters.core.services.document.v1.DocumentLayoutPublicationService;
+import io.fireflysoftware.masters.core.services.document.v1.DocumentLayoutPublicationServiceImpl;
 import io.fireflysoftware.masters.interfaces.dtos.document.layout.v1.*;
 
 import org.fireflyframework.web.idempotency.annotation.DisableIdempotency;
@@ -30,16 +30,16 @@ import reactor.core.publisher.Mono;
 class DocumentLayoutPublicationControllerTest {
     @Test
     void newPublicationIs201AndNativeAcceptedReplayIs200() {
-        var service = mock(DocumentLayoutPublicationService.class);
+        var service = mock(DocumentLayoutPublicationServiceImpl.class);
         var controller = new DocumentLayoutPublicationController(service);
         var id = java.util.UUID.randomUUID();
         when(service.publish(eq(id), any()))
                 .thenReturn(
                         Mono.just(
-                                new DocumentLayoutPublicationService.PublicationOutcome(
+                                new DocumentLayoutPublicationServiceImpl.PublicationOutcome(
                                         null, false)),
                         Mono.just(
-                                new DocumentLayoutPublicationService.PublicationOutcome(
+                                new DocumentLayoutPublicationServiceImpl.PublicationOutcome(
                                         null, true)));
         assertThat(
                         controller
