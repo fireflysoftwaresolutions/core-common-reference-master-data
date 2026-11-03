@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Deposit product agreement sandbox facts",
+  "type": "object",
+  "properties": {
+    "documentReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "issuedOn": {
+      "type": "string",
+      "format": "date"
+    },
+    "partyName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "resourceReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "system": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "resourceReference": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "system",
+          "resourceReference",
+          "version",
+          "observedAt"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 6
+    },
+    "partyReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "accountReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "accountNumber": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40
+    },
+    "contractReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "productCode": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "productVersion": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 32
+    },
+    "productName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "currency": {
+      "const": "USD"
+    },
+    "effectiveDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "executionStatus": {
+      "const": "UNSIGNED_SANDBOX"
+    },
+    "monthlyFee": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]{2}$",
+      "maxLength": 32
+    },
+    "feeWaiverBalance": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]{2}$",
+      "maxLength": 32
+    },
+    "overdraftLimit": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]{2}$",
+      "maxLength": 32
+    },
+    "creditInterestRate": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]{2}%$"
+    },
+    "termsReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "pricingReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "serviceReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "complaintsReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    }
+  },
+  "required": [
+    "documentReference",
+    "issuedOn",
+    "partyName",
+    "resourceReference",
+    "sources",
+    "partyReference",
+    "accountReference",
+    "accountNumber",
+    "contractReference",
+    "productCode",
+    "productVersion",
+    "productName",
+    "currency",
+    "effectiveDate",
+    "executionStatus",
+    "monthlyFee",
+    "feeWaiverBalance",
+    "overdraftLimit",
+    "creditInterestRate",
+    "termsReference",
+    "pricingReference",
+    "serviceReference",
+    "complaintsReference"
+  ],
+  "additionalProperties": false
+}

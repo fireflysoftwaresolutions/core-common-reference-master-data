@@ -18,6 +18,7 @@
 package io.fireflysoftware.masters.models.entities.document.v1;
 
 import io.fireflysoftware.masters.interfaces.enums.commons.v1.StatusEnum;
+import io.r2dbc.postgresql.codec.Json;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -65,7 +66,16 @@ public class DocumentTemplateCatalog {
     private String templateContent;
 
     @Column("template_variables")
-    private String templateVariables;  // Stored as JSONB in the database
+    private Json templateVariables;
+
+    @Column("input_schema")
+    private Json inputSchema;
+
+    @Column("style_content")
+    private String styleContent;
+
+    @Column("media_type")
+    private String mediaType;
 
     @Column("version")
     private String version;

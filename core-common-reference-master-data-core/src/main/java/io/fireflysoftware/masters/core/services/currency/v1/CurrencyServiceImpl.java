@@ -75,11 +75,29 @@ public class CurrencyServiceImpl implements CurrencyService {
                     updatedCurrency.setCurrencyId(currencyId); // Ensure ID matches the existing record
                     return repository.save(updatedCurrency);
                 })
-                .map(mapper::toDTO);
+                .map(mapper::toDTO)
+                .onErrorMap(this::policyConstraint);
     }
 
     @Override
     public Mono<Void> deleteCurrency(UUID currencyId) {
-        return repository.deleteById(currencyId);
+        return repository.deleteById(currencyId).onErrorMap(this::policyConstraint);
+    }
+
+    private Throwable policyConstraint(Throwable error) {
+        if (!(error instanceof org.springframework.dao.DataIntegrityViolationException)) return error;
+        Throwable cause = error;
+        for (int depth = 0; cause != null && depth < 8; depth++, cause = cause.getCause()) {
+            String message = java.util.Objects.toString(cause.getMessage(), "");
+            if (message.contains("PUBLISHED_CURRENCY_IDENTITY_CANNOT_CHANGE_OR_DELETE")
+                    || message.contains("CURRENCY_POLICY_CONCURRENT_SOURCE_CHANGE")
+                    || message.contains("currency_policy_identity_currency_id_fkey")) {
+                return new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.CONFLICT,
+                        "Published currency identity cannot be retargeted or deleted");
+            }
+            if (cause.getCause() == cause) break;
+        }
+        return error;
     }
 }

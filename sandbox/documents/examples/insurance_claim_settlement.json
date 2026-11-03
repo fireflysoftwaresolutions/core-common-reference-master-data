@@ -1,0 +1,33 @@
+{
+  "documentReference": "DEMO-INSURANCE-CLAIM-SETTLEMENT",
+  "issuedOn": "2026-10-18",
+  "partyName": "Northbridge Example Studio LLC",
+  "resourceReference": "DEMO-001",
+  "currency": "USD",
+  "claimNumber": "DEMO-CLAIM-3072",
+  "policyNumber": "DEMO-PROP-1024",
+  "lossDate": "2026-10-12",
+  "decisionReference": "DEMO-DECISION-3072",
+  "grossApproved": "12400.00",
+  "deductible": "1000.00",
+  "retainedDepreciation": "400.00",
+  "priorPayments": "2000.00",
+  "netSettlement": "9000.00",
+  "settlementState": "Sandbox calculation \u2014 no payment instructed",
+  "paymentReference": "Not issued",
+  "evidenceReference": "DEMO-ASSESSMENT-3072-v2",
+  "assessment": [
+    {
+      "description": "Approved building repairs",
+      "approved": "10000.00",
+      "coverageCode": "BUILDINGS"
+    },
+    {
+      "description": "Approved contents repair",
+      "approved": "2400.00",
+      "coverageCode": "CONTENTS"
+    }
+  ],
+  "deductibleRuleCode": "HIGHEST_APPLICABLE_ONCE",
+  "deductibleRuleReference": "SBX-PROP-WORDING-1.0.0 / shared-occurrence-deductible"
+}

@@ -1,0 +1,33 @@
+{
+  "documentReference": "DEMO-ACCOUNT-BALANCE-AS-OF",
+  "issuedOn": "2026-10-01",
+  "partyName": "Morgan Example",
+  "resourceReference": "DEMO-ACCOUNT-4821",
+  "sources": [
+    {
+      "system": "core-banking-accounts",
+      "resourceReference": "DEMO-ACCOUNT-4821",
+      "version": "12",
+      "observedAt": "2026-10-01T08:00:00Z"
+    },
+    {
+      "system": "core-banking-ledger",
+      "resourceReference": "DEMO-LEDGER-CUTOFF-1842",
+      "version": "1842",
+      "observedAt": "2026-10-01T08:00:00Z"
+    }
+  ],
+  "accountReference": "DEMO-ACCOUNT-4821",
+  "accountNumber": "•••• 4821",
+  "currency": "USD",
+  "asOf": "2026-09-30T23:59:59Z",
+  "valueDate": "2026-09-30",
+  "reportingTimeZone": "UTC",
+  "cutoffPolicy": "BOOKED_EFFECTIVE_ON_OR_BEFORE_CUTOFF",
+  "ledgerSequence": "1842",
+  "bookedBalance": "17014.27",
+  "heldAmount": "214.27",
+  "cashAvailable": "16800.00",
+  "creditFacilityIncluded": false,
+  "verificationReference": "DEMO-CERT-BAL-4821"
+}

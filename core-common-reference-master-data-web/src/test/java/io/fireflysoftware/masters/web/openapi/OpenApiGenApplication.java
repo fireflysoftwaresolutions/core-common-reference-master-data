@@ -19,6 +19,9 @@ package io.fireflysoftware.masters.web.openapi;
 import org.fireflyframework.web.openapi.EnableOpenApiGen;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
+import io.fireflysoftware.masters.web.config.openapi.MasterDataOpenApiMetadataConfiguration;
+import io.fireflysoftware.masters.web.openapi.capture.OriginalOpenApiCaptureConfiguration;
 
 /**
  * Minimal Spring Boot application used only during the Maven build to expose
@@ -31,9 +34,21 @@ import org.springframework.context.annotation.ComponentScan;
  * Maven profile with {@code useTestClasspath=true}.
  */
 @EnableOpenApiGen
+@Import({MasterDataOpenApiMetadataConfiguration.class, OriginalOpenApiCaptureConfiguration.class})
 @ComponentScan(basePackages = "io.fireflysoftware.masters.web.controllers")
 public class OpenApiGenApplication {
     public static void main(String[] args) {
-        SpringApplication.run(OpenApiGenApplication.class, args);
+        var application = new SpringApplication(OpenApiGenApplication.class);
+        application.setDefaultProperties(metadataDefaults());
+        application.run(args);
+    }
+    public static java.util.Map<String,Object> metadataDefaults() {
+        return java.util.Map.of("firefly.masters.currency-policy.current.enabled",true);
+    }
+
+    @org.springframework.context.annotation.Bean("currencyPolicyNativeCurrentObservationService")
+    @org.springframework.context.annotation.Profile("openapi-gen")
+    public io.fireflysoftware.masters.core.services.currency.observation.CurrencyPolicyCurrentObservationService currencyPolicyNativeCurrentObservationService() {
+        return io.fireflysoftware.masters.core.services.currency.observation.CurrencyPolicyCurrentObservationService.unavailable();
     }
 }

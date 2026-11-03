@@ -1,0 +1,43 @@
+{
+  "documentReference": "DEMO-INSURANCE-POLICY-DECLARATIONS",
+  "issuedOn": "2026-10-01",
+  "partyName": "Northbridge Example Studio LLC",
+  "resourceReference": "DEMO-001",
+  "currency": "USD",
+  "policyNumber": "DEMO-PROP-1024",
+  "riskAddress": "18 Example Square, Example City",
+  "effectiveDate": "2026-10-01",
+  "expiryDate": "2027-09-30",
+  "occurrenceLimit": "600000.00",
+  "annualPremium": "1800.00",
+  "tax": "160.00",
+  "totalPremium": "1960.00",
+  "policyState": "Sandbox illustration \u2014 no coverage issued",
+  "brokerReference": "DEMO-DISTRIBUTOR-001",
+  "wordingReference": "SBX-PROP-WORDING-1.0.0",
+  "endorsements": "DEMO-END-001 \u2014 listed equipment schedule",
+  "coverages": [
+    {
+      "coverage": "Buildings",
+      "limit": "500000.00",
+      "deductible": "1000.00",
+      "basis": "Illustrative replacement-cost basis",
+      "code": "BUILDINGS"
+    },
+    {
+      "coverage": "Business contents",
+      "limit": "75000.00",
+      "deductible": "500.00",
+      "basis": "Listed insured contents only",
+      "code": "CONTENTS"
+    },
+    {
+      "coverage": "Business interruption",
+      "limit": "100000.00",
+      "deductible": "0.00",
+      "basis": "Subject to an explicitly agreed indemnity period",
+      "code": "BUSINESS_INTERRUPTION"
+    }
+  ],
+  "deductibleRuleCode": "HIGHEST_APPLICABLE_ONCE"
+}

@@ -1,5 +1,7 @@
 # Transaction Category Catalog
 
+[Repository guide](../../../../../../../../../../../README.md) · [Current contracts](../../../../../../../../../../../docs/openplatform/reference.md)
+
 This package contains the implementation of a hierarchical transaction category catalog for categorizing banking transactions.
 
 ## Overview
@@ -13,6 +15,13 @@ The Transaction Category Catalog provides a flexible way to categorize banking t
 - Full CRUD operations via REST API
 - Pagination for efficient data retrieval
 
+
+## Prerequisites and record ownership
+
+These examples describe stored catalog records, not customer identity verification or a posted financial transaction. Use a disposable, migrated master-data service and a caller authorized to administer the catalog. Create/read the required parent catalog and country/locale records first. All IDs are UUIDs; the synthetic values below illustrate relationships and must be replaced by IDs actually returned in your fixture. Leave generated IDs/timestamps out of create input.
+
+The current client coordinate is `io.fireflysoftware:core-common-reference-master-data-sdk:26.10.6`. Configure the generated client's base URL and the consuming application's verified credentials/tenant context. Source-checked examples here are not records of executed HTTP calls.
+
 ## Components
 
 ### Transaction Category Catalog
@@ -24,7 +33,7 @@ The Transaction Category Catalog defines the categories that can be used for tra
 - A description
 - An optional reference to a parent category (for hierarchical structure)
 - An optional SVG icon for visual representation
-- A status (ACTIVE, INACTIVE, etc.)
+- A status (`ACTIVE` or `INACTIVE`)
 
 ### Transaction Category Localization
 
@@ -39,7 +48,7 @@ The Transaction Category Localization component provides translations of transac
 
 ### Creating a Root Transaction Category
 
-```json
+```http
 POST /api/v1/transaction-categories
 {
   "categoryCode": "INCOME",
@@ -52,13 +61,13 @@ POST /api/v1/transaction-categories
 
 ### Creating a Child Transaction Category
 
-```json
+```http
 POST /api/v1/transaction-categories
 {
   "categoryCode": "SALARY",
   "categoryName": "Salary",
   "description": "Regular income from employment",
-  "parentCategoryId": 1,
+  "parentCategoryId": "550e8400-e29b-41d4-a716-446655440000",
   "status": "ACTIVE"
 }
 ```
@@ -89,11 +98,11 @@ GET /api/v1/transaction-categories/code/{categoryCode}
 
 ### Creating a Transaction Category Localization
 
-```json
+```http
 POST /api/v1/transaction-category-localizations
 {
-  "categoryId": 1,
-  "localeId": 2,
+  "categoryId": "550e8400-e29b-41d4-a716-446655440000",
+  "localeId": "550e8400-e29b-41d4-a716-446655440003",
   "categoryName": "Ingresos",
   "description": "Dinero recibido de varias fuentes",
   "status": "ACTIVE"
@@ -133,3 +142,19 @@ The transaction category catalog supports a hierarchical structure, allowing for
   - Utilities (Child Category)
 
 This hierarchical structure allows for more detailed categorization of transactions, which can be useful for financial analysis and reporting.
+
+## Verify and govern the hierarchy
+
+Create a root first, read its returned UUID, then use that UUID as `parentCategoryId` in a child. The hierarchy example above is a taxonomy design, not seeded production content. Validate uniqueness, allowed ancestry, and the absence of self-links/cycles in the owning governance workflow. The current create/update service maps and saves the supplied parent reference; it does not prove a general cycle-detection policy.
+
+Category localizations require existing category and locale UUIDs. Read the returned localization ID and verify that its category/locale association is unchanged. Retire referenced categories through a governed procedure; a destructive delete is not equivalent to reclassifying historical transactions. Sanitization and safe rendering of stored SVG metadata belong to the consumer; do not inline untrusted SVG merely because it came from this catalog.
+
+Inspect the actual deployed error contract for missing or conflicting records. The service's empty reactive result, storage constraint error, and controller mapping are separate behaviors; an API declaration alone does not establish a precise recovery response. After a timeout, query by the governed unique code and reconcile before attempting another create.
+
+This guide describes the current record contracts and did not execute the HTTP examples. The repository's unit fixtures and generated SDK/spec require their own runtime qualification; no automatic transaction categorization, account posting, or financial reporting acceptance is established here.
+
+## Source contracts
+
+- [Request/response DTO](../../../../../../../../../../../core-common-reference-master-data-interfaces/src/main/java/io/fireflysoftware/masters/interfaces/dtos/transaction/v1/TransactionCategoryCatalogDTO.java)
+- [Actual controller mappings](../../../../../../../../../../../core-common-reference-master-data-web/src/main/java/io/fireflysoftware/masters/web/controllers/transaction/v1/TransactionCategoryCatalogController.java)
+- [SDK generation and coordinate](../../../../../../../../../../../core-common-reference-master-data-sdk/pom.xml)

@@ -1,0 +1,48 @@
+{
+  "source554V38Sha256": "a3c45ac3fab305d46f68c65775d2e5c4eba9948b406450d63a914c9265eb1ca0",
+  "legacyTables": [
+    "document_layout_notice",
+    "document_layout_publication",
+    "document_template_catalog",
+    "document_template_localization",
+    "document_template_revision",
+    "document_template_type_catalog",
+    "language_locale"
+  ],
+  "inventory": {
+    "GRANT": [
+      "public.document_layout_publication",
+      "public.document_layout_notice",
+      "public.document_template_revision",
+      "public.document_template_catalog",
+      "public.document_template_localization",
+      "public.document_template_type_catalog",
+      "public.language_locale"
+    ],
+    "FROM": [
+      "public.document_layout_publication",
+      "public.document_template_revision",
+      "public.document_template_revision",
+      "public.document_layout_notice",
+      "public.document_layout_notice",
+      "public.document_layout_publication"
+    ],
+    "JOIN": [
+      "public.document_template_catalog",
+      "public.document_template_localization",
+      "public.language_locale",
+      "public.document_template_type_catalog",
+      "public.document_template_catalog",
+      "public.document_template_localization",
+      "public.language_locale",
+      "public.document_template_type_catalog",
+      "public.document_template_revision",
+      "public.document_template_catalog",
+      "public.document_template_type_catalog"
+    ],
+    "ROWTYPE": [
+      "public.document_layout_publication",
+      "public.document_template_revision"
+    ]
+  }
+}

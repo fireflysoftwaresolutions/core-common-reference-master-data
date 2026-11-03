@@ -1,0 +1,42 @@
+{
+  "documentReference": "DEMO-CUSTOMER-PROFILE",
+  "issuedOn": "2026-10-01",
+  "partyName": "Morgan Example",
+  "resourceReference": "DEMO-CUSTOMER-4821",
+  "sources": [
+    {
+      "system": "core-common-customer-mgmt",
+      "resourceReference": "DEMO-CUSTOMER-4821",
+      "version": "7",
+      "observedAt": "2026-10-01T08:00:00Z"
+    },
+    {
+      "system": "core-common-kycb-mgmt",
+      "resourceReference": "DEMO-REVIEW-4821",
+      "version": "2",
+      "observedAt": "2026-10-01T08:00:00Z"
+    }
+  ],
+  "partyReference": "DEMO-CUSTOMER-4821",
+  "customerType": "INDIVIDUAL",
+  "relationshipSince": "2026-08-15",
+  "asOf": "2026-09-30T23:59:59Z",
+  "purpose": "INTERNAL_CUSTOMER_SERVICE",
+  "residencyCountry": "US",
+  "preferredLanguage": "en-US",
+  "maskedContact": "m•••••@example.invalid",
+  "reviewReference": "DEMO-REVIEW-4821",
+  "reviewStatus": "REVIEW_RECORDED",
+  "lastReviewDate": "2026-08-15",
+  "reviewDueDate": "2027-08-15",
+  "relationships": [
+    {
+      "productName": "Sandbox Everyday Current Account",
+      "reference": "DEMO-ACCOUNT-4821",
+      "role": "HOLDER",
+      "status": "OPEN"
+    }
+  ],
+  "consentReference": "DEMO-PRIVACY-4821",
+  "serviceReference": "DEMO-SERVICE-001"
+}

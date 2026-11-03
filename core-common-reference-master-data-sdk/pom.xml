@@ -18,6 +18,12 @@
     </properties>
 
     <dependencies>
+        <!-- Qualifies the optional native framework fallback without adding it to the executable. -->
+        <dependency>
+            <groupId>org.fireflyframework</groupId>
+            <artifactId>fireflyframework-security-resource-server</artifactId>
+            <scope>test</scope>
+        </dependency>
         <!-- Web module for OpenAPI spec -->
         <dependency>
             <groupId>io.fireflysoftware</groupId>
@@ -81,10 +87,71 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-webflux</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>mirror-producer-openapi-compatibility-resource</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.outputDirectory}/api-spec</outputDirectory>
+                            <overwrite>true</overwrite>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/src/main/resources</directory>
+                                    <filtering>false</filtering>
+                                    <includes>
+                                        <include>openapi.yml</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals><goal>integration-test</goal><goal>verify</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
 
             <!-- OpenAPI Generator Maven Plugin — version from fireflyframework-parent (7.26.0) -->
             <plugin>
@@ -105,6 +172,9 @@
                             <apiPackage>io.fireflysoftware.common.reference.master.data.sdk.api</apiPackage>
                             <modelPackage>io.fireflysoftware.common.reference.master.data.sdk.model</modelPackage>
                             <invokerPackage>io.fireflysoftware.common.reference.master.data.sdk.invoker</invokerPackage>
+                            <schemaMappings>
+                                <schemaMapping>FireflyInstant=java.time.Instant</schemaMapping>
+                            </schemaMappings>
                             <configOptions>
                                 <java20>true</java20>
                                 <useTags>true</useTags>
@@ -114,6 +184,8 @@
                                 <reactive>true</reactive>
                                 <returnResponse>true</returnResponse>
                                 <useJakartaEe>true</useJakartaEe>
+                                <useOneOfInterfaces>true</useOneOfInterfaces>
+                                <useDeductionForOneOfInterfaces>true</useDeductionForOneOfInterfaces>
                             </configOptions>
                         </configuration>
                     </execution>

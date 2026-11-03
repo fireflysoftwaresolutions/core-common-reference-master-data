@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Account balance certificate as of a date sandbox facts",
+  "type": "object",
+  "properties": {
+    "documentReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "issuedOn": {
+      "type": "string",
+      "format": "date"
+    },
+    "partyName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "resourceReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "system": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "resourceReference": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "system",
+          "resourceReference",
+          "version",
+          "observedAt"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 6
+    },
+    "accountReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "accountNumber": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40
+    },
+    "currency": {
+      "const": "USD"
+    },
+    "asOf": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "valueDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "reportingTimeZone": {
+      "const": "UTC"
+    },
+    "cutoffPolicy": {
+      "const": "BOOKED_EFFECTIVE_ON_OR_BEFORE_CUTOFF"
+    },
+    "ledgerSequence": {
+      "type": "string",
+      "pattern": "^[0-9]{1,19}$"
+    },
+    "bookedBalance": {
+      "type": "string",
+      "pattern": "^-?[0-9]+\\.[0-9]{2}$",
+      "maxLength": 32
+    },
+    "heldAmount": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]{2}$",
+      "maxLength": 32
+    },
+    "cashAvailable": {
+      "type": "string",
+      "pattern": "^-?[0-9]+\\.[0-9]{2}$",
+      "maxLength": 32
+    },
+    "creditFacilityIncluded": {
+      "const": false
+    },
+    "verificationReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    }
+  },
+  "required": [
+    "documentReference",
+    "issuedOn",
+    "partyName",
+    "resourceReference",
+    "sources",
+    "accountReference",
+    "accountNumber",
+    "currency",
+    "asOf",
+    "valueDate",
+    "reportingTimeZone",
+    "cutoffPolicy",
+    "ledgerSequence",
+    "bookedBalance",
+    "heldAmount",
+    "cashAvailable",
+    "creditFacilityIncluded",
+    "verificationReference"
+  ],
+  "additionalProperties": false
+}

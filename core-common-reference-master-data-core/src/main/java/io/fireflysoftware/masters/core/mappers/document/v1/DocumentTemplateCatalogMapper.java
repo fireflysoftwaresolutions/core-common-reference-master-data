@@ -21,7 +21,8 @@ import io.fireflysoftware.masters.interfaces.dtos.document.v1.DocumentTemplateCa
 import io.fireflysoftware.masters.interfaces.dtos.document.v1.DocumentTemplateTypeCatalogDTO;
 import io.fireflysoftware.masters.models.entities.document.v1.DocumentTemplateCatalog;
 import io.fireflysoftware.masters.models.entities.document.v1.DocumentTemplateTypeCatalog;
-import io.fireflysoftware.masters.models.repositories.document.v1.DocumentTemplateTypeCatalogRepository;
+import io.r2dbc.postgresql.codec.Json;
+import io.fireflysoftware.masters.core.services.document.v1.DocumentTemplateCanonicalJson;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.mapstruct.Mapper;
@@ -35,17 +36,11 @@ import java.util.UUID;
 /**
  * Mapper for converting between DocumentTemplateCatalog entities and DTOs.
  */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", imports = {Json.class, DocumentTemplateCanonicalJson.class})
 public abstract class DocumentTemplateCatalogMapper {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private DocumentTemplateTypeCatalogRepository documentTemplateTypeCatalogRepository;
-
-    @Autowired
-    private DocumentTemplateTypeCatalogMapper documentTemplateTypeCatalogMapper;
 
     /**
      * Convert a DocumentTemplateCatalog entity to a DTO.
@@ -53,6 +48,8 @@ public abstract class DocumentTemplateCatalogMapper {
      * @param entity the entity to convert
      * @return the converted DTO
      */
+    @Mapping(target = "inputSchemaJson", expression = "java(entity.getInputSchema() == null ? null : DocumentTemplateCanonicalJson.canonicalize(entity.getInputSchema().asString()))")
+    @Mapping(source = "inputSchema", target = "inputSchema", qualifiedByName = "templateVariablesToMap")
     @Mapping(source = "templateVariables", target = "templateVariables", qualifiedByName = "templateVariablesToMap")
     @Mapping(source = "typeId", target = "templateType", qualifiedByName = "typeIdToTemplateType")
     public abstract DocumentTemplateCatalogDTO toDTO(DocumentTemplateCatalog entity);
@@ -63,8 +60,9 @@ public abstract class DocumentTemplateCatalogMapper {
      * @param dto the DTO to convert
      * @return the converted entity
      */
+    @Mapping(target = "inputSchema", expression = "java(dto.getInputSchemaJson() != null ? Json.of(dto.getInputSchemaJson()) : mapToTemplateVariables(dto.getInputSchema()))")
     @Mapping(source = "templateVariables", target = "templateVariables", qualifiedByName = "mapToTemplateVariables")
-    @Mapping(source = "templateType", target = "typeId", qualifiedByName = "templateTypeToTypeId")
+    @Mapping(target = "typeId", expression = "java(dto.getTypeId() != null ? dto.getTypeId() : templateTypeToTypeId(dto.getTemplateType()))")
     public abstract DocumentTemplateCatalog toEntity(DocumentTemplateCatalogDTO dto);
 
     /**
@@ -74,12 +72,12 @@ public abstract class DocumentTemplateCatalogMapper {
      * @return the converted Map
      */
     @Named("templateVariablesToMap")
-    protected Map<String, Object> templateVariablesToMap(String templateVariables) {
+    protected Map<String, Object> templateVariablesToMap(Json templateVariables) {
         if (templateVariables == null) {
             return null;
         }
         try {
-            return objectMapper.readValue(templateVariables, Map.class);
+            return objectMapper.readValue(templateVariables.asString(), Map.class);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Error converting template variables JSON to Map", e);
         }
@@ -92,12 +90,12 @@ public abstract class DocumentTemplateCatalogMapper {
      * @return the converted JSON string
      */
     @Named("mapToTemplateVariables")
-    protected String mapToTemplateVariables(Map<String, Object> templateVariables) {
+    protected Json mapToTemplateVariables(Map<String, Object> templateVariables) {
         if (templateVariables == null) {
             return null;
         }
         try {
-            return objectMapper.writeValueAsString(templateVariables);
+            return Json.of(objectMapper.writeValueAsString(templateVariables));
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Error converting template variables Map to JSON", e);
         }
@@ -114,9 +112,7 @@ public abstract class DocumentTemplateCatalogMapper {
         if (typeId == null) {
             return null;
         }
-        return documentTemplateTypeCatalogRepository.findById(typeId)
-                .map(documentTemplateTypeCatalogMapper::toDTO)
-                .block();
+        return DocumentTemplateTypeCatalogDTO.builder().typeId(typeId).build();
     }
 
     /**

@@ -1,0 +1,38 @@
+{
+  "documentReference": "DEMO-ACCOUNT-OWNERSHIP",
+  "issuedOn": "2026-10-01",
+  "partyName": "Morgan Example",
+  "resourceReference": "DEMO-ACCOUNT-4821",
+  "sources": [
+    {
+      "system": "core-banking-accounts",
+      "resourceReference": "DEMO-ACCOUNT-4821",
+      "version": "12",
+      "observedAt": "2026-10-01T08:00:00Z"
+    },
+    {
+      "system": "core-common-customer-mgmt",
+      "resourceReference": "DEMO-CUSTOMER-4821",
+      "version": "7",
+      "observedAt": "2026-10-01T08:00:00Z"
+    }
+  ],
+  "accountReference": "DEMO-ACCOUNT-4821",
+  "accountNumber": "•••• 4821",
+  "accountType": "CURRENT",
+  "currency": "USD",
+  "accountStatus": "OPEN",
+  "asOf": "2026-09-30T23:59:59Z",
+  "openedOn": "2026-09-01",
+  "certificatePurpose": "Sandbox account-holder confirmation",
+  "holders": [
+    {
+      "partyName": "Morgan Example",
+      "partyReference": "DEMO-CUSTOMER-4821",
+      "role": "OWNER",
+      "validFrom": "2026-09-01"
+    }
+  ],
+  "issuerAuthorityReference": "DEMO-CERTIFICATION-AUTHORITY-01",
+  "verificationReference": "DEMO-CERT-OWN-4821"
+}

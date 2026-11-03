@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Account ownership certificate sandbox facts",
+  "type": "object",
+  "properties": {
+    "documentReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "issuedOn": {
+      "type": "string",
+      "format": "date"
+    },
+    "partyName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "resourceReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "system": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "resourceReference": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "system",
+          "resourceReference",
+          "version",
+          "observedAt"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 6
+    },
+    "accountReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "accountNumber": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40
+    },
+    "accountType": {
+      "const": "CURRENT"
+    },
+    "currency": {
+      "const": "USD"
+    },
+    "accountStatus": {
+      "const": "OPEN"
+    },
+    "asOf": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "openedOn": {
+      "type": "string",
+      "format": "date"
+    },
+    "certificatePurpose": {
+      "const": "Sandbox account-holder confirmation"
+    },
+    "holders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "partyName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "partyReference": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "role": {
+            "const": "OWNER"
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": [
+          "partyName",
+          "partyReference",
+          "role",
+          "validFrom"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 4
+    },
+    "issuerAuthorityReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "verificationReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    }
+  },
+  "required": [
+    "documentReference",
+    "issuedOn",
+    "partyName",
+    "resourceReference",
+    "sources",
+    "accountReference",
+    "accountNumber",
+    "accountType",
+    "currency",
+    "accountStatus",
+    "asOf",
+    "openedOn",
+    "certificatePurpose",
+    "holders",
+    "issuerAuthorityReference",
+    "verificationReference"
+  ],
+  "additionalProperties": false
+}
